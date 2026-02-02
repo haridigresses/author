@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --editor-width: 65ch;
+  --editor-padding: 2rem;
+}
+
+body {
+  @apply bg-gray-50 text-gray-900;
+}
+
+/* TipTap editor styles */
+.ProseMirror {
+  @apply outline-none;
+  max-width: var(--editor-width);
+  margin: 0 auto;
+  padding: var(--editor-padding);
+  min-height: 100vh;
+}
+
+.ProseMirror p {
+  @apply mb-4 leading-relaxed;
+}
+
+.ProseMirror h1 {
+  @apply text-4xl font-bold mb-6 mt-8;
+}
+
+.ProseMirror h2 {
+  @apply text-3xl font-semibold mb-4 mt-6;
+}
+
+.ProseMirror h3 {
+  @apply text-2xl font-semibold mb-3 mt-5;
+}
+
+.ProseMirror:focus {
+  @apply outline-none;
+}
+
+/* Callout styles */
+.ProseMirror .callout {
+  @apply my-4 p-4 rounded-lg border-l-4 bg-gray-50;
+}
+
+.ProseMirror .callout[data-type="info"] {
+  @apply border-blue-500 bg-blue-50;
+}
+
+.ProseMirror .callout[data-type="warning"] {
+  @apply border-yellow-500 bg-yellow-50;
+}
+
+.ProseMirror .callout[data-type="error"] {
+  @apply border-red-500 bg-red-50;
+}
+
+.ProseMirror .callout[data-type="success"] {
+  @apply border-green-500 bg-green-50;
+}
+
+/* Table styles */
+.ProseMirror table {
+  @apply border-collapse table-auto w-full my-4;
+}
+
+.ProseMirror table td,
+.ProseMirror table th {
+  @apply border border-gray-300 px-4 py-2;
+}
+
+.ProseMirror table th {
+  @apply bg-gray-100 font-semibold;
+}
+
+/* Generated image styles */
+.ProseMirror img[data-generated="true"] {
+  @apply my-4 rounded-lg;
+}
