@@ -1,0 +1,52 @@
+import { NextRequest, NextResponse } from 'next/server'
+
+const ACTION_PROMPTS: Record<string, string> = {
+  copyedit: `You are a copy editor. Fix spelling, punctuation, capitalization, and formatting issues in the selected text. Preserve the author's voice. Output ONLY the corrected text.`,
+  grammar: `You are a grammar editor. Fix grammatical errors in the selected text while preserving meaning and voice. Output ONLY the corrected text.`,
+  redundancy: `You are a conciseness editor. Remove redundant words, phrases, and sentences from the selected text. Make it tighter without losing meaning. Output ONLY the revised text.`,
+  cadence: `You are a prose rhythm editor. Improve the cadence and flow of the selected text — vary sentence length, improve transitions, make it read more naturally. Output ONLY the revised text.`,
+  expand: `You are a writing assistant. Expand the selected text with concrete examples, evidence, or elaboration that supports the point being made. Match the document's tone. Output ONLY the expanded text.`,
+  clarity: `You are a clarity editor. Rewrite the selected text to be clearer and easier to understand. Eliminate ambiguity, untangle complex sentences, and make the meaning unmistakable. Preserve the author's intent. Output ONLY the revised text.`,
+  simplify: `You are a simplification editor. Rewrite the selected text using simpler words and shorter sentences. Target a general audience — no jargon, no unnecessary complexity. Preserve meaning. Output ONLY the simplified text.`,
+  strengthen: `You are an argumentation editor. Strengthen the reasoning in the selected text — make claims more precise, add qualifiers where needed, sharpen the logic, and make the argument more compelling. Output ONLY the strengthened text.`,
+  shorten: `You are a brevity editor. Cut the selected text down to its essential meaning. Remove filler, hedging, and anything that doesn't earn its place. Aim for at least 30% shorter. Output ONLY the shortened text.`,
+}
+
+export async function POST(req: NextRequest) {
+  const { action, text, documentContext } = await req.json()
+
+  const systemPrompt = ACTION_PROMPTS[action]
+  if (!systemPrompt) {
+    return NextResponse.json({ error: 'Unknown action' }, { status: 400 })
+  }
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': process.env.ANTHROPIC_API_KEY!,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1024,
+      system: systemPrompt,
+      messages: [
+        {
+          role: 'user',
+          content: `Document context:\n${documentContext}\n\nSelected text to edit:\n${text}`,
+        },
+      ],
+    }),
+  })
+
+  if (!res.ok) {
+    const err = await res.text()
+    return NextResponse.json({ error: err }, { status: res.status })
+  }
+
+  const data = await res.json()
+  const result = data.content?.[0]?.text ?? ''
+
+  return NextResponse.json({ result })
+}

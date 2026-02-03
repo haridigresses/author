@@ -76,6 +76,609 @@ body {
 }
 
 /* Generated image styles */
-.ProseMirror img[data-generated="true"] {
-  @apply my-4 rounded-lg;
+.ProseMirror img {
+  @apply max-w-full rounded-lg;
+}
+
+.ProseMirror img[data-generated="true"],
+.generated-image {
+  @apply my-4 rounded-lg max-w-full;
+}
+
+.generated-image-placeholder {
+  @apply my-4 p-8 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 flex items-center gap-3 text-gray-500 text-sm;
+}
+
+.generated-image-caption {
+  @apply text-xs text-gray-400 mt-1 italic;
+}
+
+.generating-spinner {
+  @apply w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin;
+}
+
+/* Ghost text (tab completion) */
+.ghost-text {
+  @apply text-gray-400 pointer-events-none;
+}
+
+/* Hemingway highlights */
+.mencken-very-long {
+  @apply bg-red-100 rounded-sm;
+}
+
+.mencken-long {
+  @apply bg-yellow-100 rounded-sm;
+}
+
+.mencken-passive {
+  @apply bg-green-100 rounded-sm;
+}
+
+.mencken-adverb {
+  @apply bg-blue-100 rounded-sm;
+}
+
+.mencken-complex {
+  @apply bg-purple-100 rounded-sm;
+}
+
+/* Additional editor element styles */
+.ProseMirror blockquote {
+  @apply border-l-4 border-gray-300 pl-4 my-4 text-gray-600 italic;
+}
+
+.ProseMirror code {
+  @apply bg-gray-100 rounded px-1 py-0.5 text-sm font-mono text-pink-600;
+}
+
+.ProseMirror pre {
+  @apply bg-gray-900 text-gray-100 rounded-lg p-4 my-4 overflow-x-auto;
+}
+
+.ProseMirror pre code {
+  @apply bg-transparent text-inherit p-0;
+}
+
+.ProseMirror hr {
+  @apply my-6 border-gray-200;
+}
+
+.ProseMirror ul {
+  @apply list-disc pl-6 mb-4;
+}
+
+.ProseMirror ol {
+  @apply list-decimal pl-6 mb-4;
+}
+
+.ProseMirror li {
+  @apply mb-1;
+}
+
+.ProseMirror ul[data-type="taskList"] {
+  @apply list-none pl-0;
+}
+
+.ProseMirror ul[data-type="taskList"] li {
+  @apply flex items-start gap-2;
+}
+
+.ProseMirror ul[data-type="taskList"] li label {
+  @apply mt-1;
+}
+
+.ProseMirror mark {
+  @apply bg-yellow-200 rounded-sm px-0.5;
+}
+
+.ProseMirror a {
+  @apply text-blue-600 underline cursor-pointer;
+}
+
+.ProseMirror sup {
+  @apply text-xs;
+}
+
+.ProseMirror sub {
+  @apply text-xs;
+}
+
+.ProseMirror .is-empty::before {
+  @apply text-gray-400 float-left h-0 pointer-events-none;
+  content: attr(data-placeholder);
+}
+
+.ProseMirror .is-empty.is-editor-empty::before {
+  @apply text-gray-400;
+}
+
+/* Toolbar */
+.toolbar {
+  @apply sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-2 flex flex-wrap items-center gap-1.5 text-sm;
+}
+
+.toolbar-btn {
+  @apply px-2 py-1 border border-gray-300 rounded hover:bg-gray-50 transition-colors text-xs font-medium;
+}
+
+.toolbar-btn:disabled {
+  @apply opacity-30 cursor-not-allowed;
+}
+
+.toolbar-btn-active {
+  @apply bg-gray-200 border-gray-400;
+}
+
+.toolbar-separator {
+  @apply w-px h-5 bg-gray-200 mx-1;
+}
+
+.toolbar-hint {
+  @apply text-gray-400 text-xs;
+}
+
+.toolbar-toggle {
+  @apply flex items-center gap-1.5 cursor-pointer select-none text-gray-600;
+}
+
+.toolbar-image-form {
+  @apply flex items-center gap-1;
+}
+
+.toolbar-image-input {
+  @apply px-2 py-1 border border-gray-300 rounded text-sm w-48 outline-none focus:border-blue-400;
+}
+
+/* Command palette */
+.command-palette {
+  @apply z-50 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[200px];
+}
+
+.command-palette-item {
+  @apply flex items-center gap-2 w-full px-3 py-2 text-left text-sm hover:bg-gray-50 transition-colors;
+}
+
+.command-palette-shortcut {
+  @apply w-5 h-5 flex items-center justify-center text-xs font-mono bg-gray-100 rounded text-gray-500;
+}
+
+/* Diff view */
+.diff-view {
+  @apply z-50 bg-white rounded-lg shadow-lg border border-gray-200 p-4 min-w-[300px] max-w-[500px];
+}
+
+.diff-loading {
+  @apply text-gray-500 text-sm py-4 text-center animate-pulse;
+}
+
+.diff-header {
+  @apply mb-3 pb-2 border-b border-gray-100;
+}
+
+.diff-action-label {
+  @apply text-xs font-medium uppercase tracking-wide text-gray-500;
+}
+
+.diff-content {
+  @apply space-y-3 text-sm;
+}
+
+.diff-original {
+  @apply p-2 bg-red-50 rounded border border-red-100;
+}
+
+.diff-suggested {
+  @apply p-2 bg-green-50 rounded border border-green-100;
+}
+
+.diff-label {
+  @apply text-xs font-medium text-gray-400 mb-1;
+}
+
+.diff-actions {
+  @apply flex gap-2 mt-3 pt-2 border-t border-gray-100;
+}
+
+.diff-accept {
+  @apply flex-1 px-3 py-1.5 bg-green-600 text-white rounded text-sm hover:bg-green-700 transition-colors;
+}
+
+.diff-reject {
+  @apply flex-1 px-3 py-1.5 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200 transition-colors;
+}
+
+/* Layout */
+.editor-layout {
+  @apply flex h-screen;
+}
+
+.editor-main {
+  @apply flex-1 flex flex-col min-w-0 overflow-y-auto;
+}
+
+/* Status bar */
+.status-bar {
+  @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-1.5 text-xs text-gray-500 flex items-center gap-1 z-10;
+}
+
+.status-sep {
+  @apply text-gray-300 mx-1;
+}
+
+/* Bubble menu */
+.bubble-menu {
+  @apply flex items-center gap-0.5 bg-white rounded-lg shadow-lg border border-gray-200 p-1;
+}
+
+.bubble-btn {
+  @apply px-2 py-1 text-xs rounded hover:bg-gray-100 transition-colors font-medium;
+}
+
+.bubble-btn-active {
+  @apply bg-gray-200;
+}
+
+.bubble-sep {
+  @apply w-px h-4 bg-gray-200 mx-0.5;
+}
+
+/* Slash command menu */
+.slash-menu {
+  @apply bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[220px] max-h-[300px] overflow-y-auto;
+}
+
+.slash-menu-empty {
+  @apply px-3 py-2 text-sm text-gray-400;
+}
+
+.slash-menu-item {
+  @apply flex flex-col w-full px-3 py-2 text-left hover:bg-gray-50 transition-colors;
+}
+
+.slash-menu-item-active {
+  @apply bg-gray-50;
+}
+
+.slash-menu-title {
+  @apply text-sm font-medium;
+}
+
+.slash-menu-desc {
+  @apply text-xs text-gray-400;
+}
+
+/* AI Sidebar */
+.ai-sidebar {
+  @apply w-80 border-l border-gray-200 bg-white flex flex-col overflow-y-auto;
+}
+
+.ai-sidebar-header {
+  @apply flex items-center justify-between p-3 border-b border-gray-200;
+}
+
+.ai-sidebar-header h3 {
+  @apply text-sm font-semibold;
+}
+
+.ai-sidebar-close {
+  @apply w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded hover:bg-gray-100;
+}
+
+.ai-sidebar-body {
+  @apply p-3 flex flex-col gap-4 overflow-y-auto;
+}
+
+.ai-section {
+  @apply flex flex-col gap-2;
+}
+
+.ai-section h4 {
+  @apply text-xs font-semibold uppercase tracking-wide text-gray-500;
+}
+
+.ai-section-hint {
+  @apply text-xs text-gray-400 -mt-1;
+}
+
+.ai-btn-grid {
+  @apply flex flex-wrap gap-1;
+}
+
+.ai-action-btn {
+  @apply px-2 py-1 text-xs border border-gray-300 rounded hover:bg-gray-50 transition-colors;
+}
+
+.ai-action-btn:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+.ai-action-list {
+  @apply flex flex-col gap-0.5;
+}
+
+.ai-action-row {
+  @apply flex items-center gap-2 px-2 py-1.5 text-left rounded hover:bg-gray-50 transition-colors w-full;
+}
+
+.ai-action-row:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+.ai-action-key {
+  @apply w-5 h-5 flex items-center justify-center text-xs font-mono bg-gray-100 rounded text-gray-500 flex-shrink-0;
+}
+
+.ai-action-label {
+  @apply text-xs font-medium flex-shrink-0;
+}
+
+.ai-action-desc {
+  @apply text-xs text-gray-400 truncate;
+}
+
+.ai-sidebar-loading {
+  @apply text-sm text-gray-400 animate-pulse py-4 text-center;
+}
+
+.ai-sidebar-result {
+  @apply bg-gray-50 rounded p-3 text-sm border border-gray-200;
+}
+
+.ai-sidebar-result pre {
+  @apply whitespace-pre-wrap text-xs leading-relaxed;
+}
+
+.ai-apply-btn {
+  @apply mt-2 w-full px-3 py-1.5 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 transition-colors;
+}
+
+/* Version panel */
+.version-panel {
+  @apply w-72 border-l border-gray-200 bg-white flex flex-col overflow-y-auto;
+}
+
+.version-panel-header {
+  @apply flex items-center justify-between p-3 border-b border-gray-200;
+}
+
+.version-panel-header h3 {
+  @apply text-sm font-semibold;
+}
+
+.version-panel-actions {
+  @apply flex items-center gap-2;
+}
+
+.version-panel-close {
+  @apply w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded hover:bg-gray-100;
+}
+
+.version-panel-list {
+  @apply flex-1 overflow-y-auto;
+}
+
+.version-panel-empty {
+  @apply p-3 text-xs text-gray-400;
+}
+
+.version-item {
+  @apply flex items-center justify-between px-3 py-2 border-b border-gray-100 hover:bg-gray-50;
+}
+
+.version-item-info {
+  @apply flex flex-col;
+}
+
+.version-item-time {
+  @apply text-xs font-medium;
+}
+
+.version-item-words {
+  @apply text-xs text-gray-400;
+}
+
+.version-item-restore {
+  @apply text-xs text-blue-600 hover:text-blue-800;
+}
+
+/* Shortcut cheatsheet */
+.cheatsheet-overlay {
+  @apply fixed inset-0 bg-black/50 z-50 flex items-center justify-center;
+}
+
+.cheatsheet {
+  @apply bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6;
+}
+
+.cheatsheet-header {
+  @apply flex items-center justify-between mb-4;
+}
+
+.cheatsheet-header h2 {
+  @apply text-lg font-bold;
+}
+
+.cheatsheet-close {
+  @apply w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 text-xl;
+}
+
+.cheatsheet-grid {
+  @apply grid grid-cols-2 gap-6;
+}
+
+.cheatsheet-section h3 {
+  @apply text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2;
+}
+
+.cheatsheet-row {
+  @apply flex items-center justify-between py-1;
+}
+
+.cheatsheet-row kbd {
+  @apply text-xs font-mono bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200;
+}
+
+.cheatsheet-row span {
+  @apply text-sm text-gray-600;
+}
+
+/* Dark mode */
+.dark body,
+.dark .ProseMirror {
+  @apply bg-gray-900 text-gray-100;
+}
+
+.dark .toolbar {
+  @apply bg-gray-800 border-gray-700;
+}
+
+.dark .toolbar-btn {
+  @apply border-gray-600 text-gray-300 hover:bg-gray-700;
+}
+
+.dark .toolbar-btn-active {
+  @apply bg-gray-700 border-gray-500;
+}
+
+.dark .toolbar-separator {
+  @apply bg-gray-600;
+}
+
+.dark .toolbar-toggle {
+  @apply text-gray-400;
+}
+
+.dark .toolbar-image-input {
+  @apply bg-gray-800 border-gray-600 text-gray-200;
+}
+
+.dark .status-bar {
+  @apply bg-gray-800 border-gray-700 text-gray-400;
+}
+
+.dark .bubble-menu {
+  @apply bg-gray-800 border-gray-700;
+}
+
+.dark .bubble-btn {
+  @apply text-gray-300 hover:bg-gray-700;
+}
+
+.dark .bubble-btn-active {
+  @apply bg-gray-700;
+}
+
+.dark .slash-menu {
+  @apply bg-gray-800 border-gray-700;
+}
+
+.dark .slash-menu-item:hover,
+.dark .slash-menu-item-active {
+  @apply bg-gray-700;
+}
+
+.dark .slash-menu-title {
+  @apply text-gray-200;
+}
+
+.dark .command-palette {
+  @apply bg-gray-800 border-gray-700;
+}
+
+.dark .command-palette-item:hover {
+  @apply bg-gray-700;
+}
+
+.dark .command-palette-shortcut {
+  @apply bg-gray-700 text-gray-400;
+}
+
+.dark .diff-view {
+  @apply bg-gray-800 border-gray-700;
+}
+
+.dark .ai-sidebar {
+  @apply bg-gray-800 border-gray-700;
+}
+
+.dark .ai-sidebar-header {
+  @apply border-gray-700;
+}
+
+.dark .ai-action-btn {
+  @apply border-gray-600 text-gray-300 hover:bg-gray-700;
+}
+
+.dark .ai-action-row:hover {
+  @apply bg-gray-700;
+}
+
+.dark .ai-action-key {
+  @apply bg-gray-700 text-gray-400;
+}
+
+.dark .ai-sidebar-result {
+  @apply bg-gray-900 border-gray-700;
+}
+
+.dark .version-panel {
+  @apply bg-gray-800 border-gray-700;
+}
+
+.dark .version-panel-header {
+  @apply border-gray-700;
+}
+
+.dark .version-item {
+  @apply border-gray-700 hover:bg-gray-700;
+}
+
+.dark .cheatsheet {
+  @apply bg-gray-800;
+}
+
+.dark .cheatsheet-row kbd {
+  @apply bg-gray-700 border-gray-600;
+}
+
+.dark .cheatsheet-row span {
+  @apply text-gray-300;
+}
+
+.dark .ProseMirror .callout {
+  @apply bg-gray-800;
+}
+
+.dark .ProseMirror table td,
+.dark .ProseMirror table th {
+  @apply border-gray-600;
+}
+
+.dark .ProseMirror table th {
+  @apply bg-gray-800;
+}
+
+.dark .ProseMirror blockquote {
+  @apply border-gray-600 text-gray-400;
+}
+
+.dark .ProseMirror code {
+  @apply bg-gray-800 text-pink-400;
+}
+
+.dark .ProseMirror hr {
+  @apply border-gray-700;
+}
+
+.dark .ProseMirror a {
+  @apply text-blue-400;
+}
+
+.dark .ProseMirror mark {
+  @apply bg-yellow-800 text-yellow-200;
+}
+
+.dark .ghost-text {
+  @apply text-gray-600;
 }
