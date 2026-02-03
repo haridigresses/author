@@ -150,6 +150,15 @@ export const HighlightShortcutsExtension = Extension.create({
       'Mod-Alt-8': ({ editor }) => fireAction(editor, 'strengthen'),
       'Mod-Alt-9': ({ editor }) => fireAction(editor, 'shorten'),
 
+      Enter: ({ editor }) => {
+        const state = highlightShortcutsKey.getState(editor.view.state)
+        if (state?.showDiff && state?.suggestedText && !state.loading) {
+          // Accept the suggestion on Enter
+          return editor.commands.acceptEditingSuggestion()
+        }
+        return false
+      },
+
       Escape: ({ editor }) => {
         const state = highlightShortcutsKey.getState(editor.view.state)
         if (state?.showPalette || state?.showDiff) {
@@ -217,18 +226,56 @@ export const HighlightShortcutsExtension = Extension.create({
         const state: HighlightShortcutsState = highlightShortcutsKey.getState(editor.view.state)
         if (!state?.suggestedText || !state.showDiff) return false
 
-        editor
-          .chain()
-          .focus()
-          .deleteRange({ from: state.selectionFrom, to: state.selectionTo })
-          .insertContentAt(state.selectionFrom, state.suggestedText)
-          .run()
+        try {
+          // Get current state to ensure we're working with the latest document
+          const currentState = editor.view.state
+          
+          // Validate stored positions are still valid
+          const docSize = currentState.doc.content.size
+          let replaceFrom = state.selectionFrom
+          let replaceTo = state.selectionTo
+          
+          // Ensure positions are within document bounds
+          if (replaceFrom < 0 || replaceTo > docSize || replaceFrom > replaceTo) {
+            // If stored positions are invalid, try current selection
+            const { from, to } = currentState.selection
+            if (from !== to && from >= 0 && to <= docSize) {
+              replaceFrom = from
+              replaceTo = to
+            } else {
+              // No valid selection available
+              editor.view.dispatch(
+                currentState.tr.setMeta(highlightShortcutsKey, { ...EMPTY_STATE })
+              )
+              return false
+            }
+          }
 
-        editor.view.dispatch(
-          editor.view.state.tr.setMeta(highlightShortcutsKey, { ...EMPTY_STATE })
-        )
+          // Use TipTap's command chain which handles state properly
+          const result = editor
+            .chain()
+            .focus()
+            .setTextSelection({ from: replaceFrom, to: replaceTo })
+            .deleteSelection()
+            .insertContent(state.suggestedText)
+            .run()
 
-        return true
+          // Clear the plugin state after successful replacement
+          if (result) {
+            editor.view.dispatch(
+              editor.view.state.tr.setMeta(highlightShortcutsKey, { ...EMPTY_STATE })
+            )
+          }
+
+          return result
+        } catch (error) {
+          // If anything fails, clear the state and return false
+          console.error('Error accepting editing suggestion:', error)
+          editor.view.dispatch(
+            editor.view.state.tr.setMeta(highlightShortcutsKey, { ...EMPTY_STATE })
+          )
+          return false
+        }
       },
 
       rejectEditingSuggestion: () => ({ editor }) => {

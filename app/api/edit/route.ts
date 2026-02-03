@@ -1,4 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
+import Anthropic from '@anthropic-ai/sdk'
+
+const client = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+  timeout: 30000, // 30 second timeout
+})
 
 const ACTION_PROMPTS: Record<string, string> = {
   copyedit: `You are a copy editor. Fix spelling, punctuation, capitalization, and formatting issues in the selected text. Preserve the author's voice. Output ONLY the corrected text.`,
@@ -13,21 +19,15 @@ const ACTION_PROMPTS: Record<string, string> = {
 }
 
 export async function POST(req: NextRequest) {
-  const { action, text, documentContext } = await req.json()
+  try {
+    const { action, text, documentContext } = await req.json()
 
-  const systemPrompt = ACTION_PROMPTS[action]
-  if (!systemPrompt) {
-    return NextResponse.json({ error: 'Unknown action' }, { status: 400 })
-  }
+    const systemPrompt = ACTION_PROMPTS[action]
+    if (!systemPrompt) {
+      return NextResponse.json({ error: 'Unknown action' }, { status: 400 })
+    }
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': process.env.ANTHROPIC_API_KEY!,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
+    const response = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1024,
       system: systemPrompt,
@@ -37,16 +37,12 @@ export async function POST(req: NextRequest) {
           content: `Document context:\n${documentContext}\n\nSelected text to edit:\n${text}`,
         },
       ],
-    }),
-  })
+    })
 
-  if (!res.ok) {
-    const err = await res.text()
-    return NextResponse.json({ error: err }, { status: res.status })
+    const result = response.content[0]?.type === 'text' ? response.content[0].text : ''
+    return NextResponse.json({ result })
+  } catch (e: any) {
+    console.error('[API edit] Error:', e)
+    return NextResponse.json({ error: e.message }, { status: 500 })
   }
-
-  const data = await res.json()
-  const result = data.content?.[0]?.text ?? ''
-
-  return NextResponse.json({ result })
 }

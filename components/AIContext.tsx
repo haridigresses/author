@@ -1,0 +1,105 @@
+'use client'
+
+import { createContext, useContext, useState, useCallback, ReactNode } from 'react'
+
+interface ChatMessage {
+  role: 'user' | 'assistant' | 'system'
+  content: string
+  isInsertable?: boolean // Can this message be inserted into the document?
+}
+
+interface AIContextType {
+  // Loading state
+  loading: boolean
+  setLoading: (loading: boolean) => void
+
+  // Unified chat
+  messages: ChatMessage[]
+  addMessage: (message: ChatMessage) => void
+  clearMessages: () => void
+
+  // Current insertable content (latest suggestion)
+  insertableContent: string | null
+  setInsertableContent: (content: string | null) => void
+
+  // Selected text context for the chat
+  selectionContext: { text: string; docContent: string } | null
+  setSelectionContext: (ctx: { text: string; docContent: string } | null) => void
+
+  // Track changes mode
+  trackChanges: boolean
+  setTrackChanges: (enabled: boolean) => void
+
+  // Sidebar expanded state
+  sidebarExpanded: boolean
+  setSidebarExpanded: (expanded: boolean) => void
+}
+
+const AIContext = createContext<AIContextType | null>(null)
+
+export function AIProvider({ children }: { children: ReactNode }) {
+  const [loading, setLoadingState] = useState(false)
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [insertableContent, setInsertableContentState] = useState<string | null>(null)
+  const [selectionContext, setSelectionContextState] = useState<{ text: string; docContent: string } | null>(null)
+  const [trackChanges, setTrackChangesState] = useState(true) // Default on
+  const [sidebarExpanded, setSidebarExpanded] = useState(false)
+
+  const setLoading = useCallback((value: boolean) => {
+    setLoadingState(value)
+  }, [])
+
+  const addMessage = useCallback((message: ChatMessage) => {
+    setMessages(prev => [...prev, message])
+    if (message.isInsertable && message.role === 'assistant') {
+      setInsertableContentState(message.content)
+    }
+    setSidebarExpanded(true)
+  }, [])
+
+  const clearMessages = useCallback(() => {
+    setMessages([])
+    setInsertableContentState(null)
+    setSelectionContextState(null)
+  }, [])
+
+  const setInsertableContent = useCallback((content: string | null) => {
+    setInsertableContentState(content)
+  }, [])
+
+  const setSelectionContext = useCallback((ctx: { text: string; docContent: string } | null) => {
+    setSelectionContextState(ctx)
+  }, [])
+
+  const setTrackChanges = useCallback((enabled: boolean) => {
+    setTrackChangesState(enabled)
+  }, [])
+
+  return (
+    <AIContext.Provider value={{
+      loading,
+      setLoading,
+      messages,
+      addMessage,
+      clearMessages,
+      insertableContent,
+      setInsertableContent,
+      selectionContext,
+      setSelectionContext,
+      trackChanges,
+      setTrackChanges,
+      sidebarExpanded,
+      setSidebarExpanded,
+    }}>
+      {children}
+    </AIContext.Provider>
+  )
+}
+
+export function useAI() {
+  const context = useContext(AIContext)
+  if (!context) {
+    throw new Error('useAI must be used within AIProvider')
+  }
+  return context
+}

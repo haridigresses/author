@@ -33,7 +33,9 @@ import StatusBar from './StatusBar'
 import BubbleToolbar from './BubbleToolbar'
 import { CommandPalette, DiffView } from './CommandPalette'
 import ShortcutCheatsheet from './ShortcutCheatsheet'
+import { AIProvider } from './AIContext'
 import AISidebar from './AISidebar'
+import AICommandPalette from './AICommandPalette'
 import VersionPanel from './VersionPanel'
 import { useAutosave } from './hooks/useAutosave'
 import { useDarkMode } from './hooks/useDarkMode'
@@ -64,7 +66,7 @@ export default function Editor() {
           if (node.type.name === 'heading' && node.attrs.level === 1) return 'Title'
           if (node.type.name === 'heading' && node.attrs.level === 3) return 'Subtitle'
           if (node.type.name === 'heading') return `Heading ${node.attrs.level}`
-          return 'Start writing... (type / for commands)'
+          return 'Start writing... (/ for commands, ⌘K for AI)'
         },
       }),
       Typography,
@@ -161,38 +163,41 @@ export default function Editor() {
   if (!editor) return null
 
   return (
-    <div className="editor-layout editor-layout-with-panel">
-      <div className="editor-main">
-        <Toolbar
-          editor={editor}
-          onToggleVersions={() => { setShowVersions((v) => !v) }}
-          onExportMarkdown={() => exportMarkdown(editor)}
-          onToggleDark={toggleDark}
-          dark={dark}
-        />
-        <BubbleToolbar editor={editor} />
-        <EditorContent editor={editor} />
-        <StatusBar editor={editor} />
-        {shortcutsState && (
-          <>
-            <CommandPalette editor={editor} state={shortcutsState} />
-            <DiffView editor={editor} state={shortcutsState} />
-          </>
+    <AIProvider>
+      <div className="editor-layout editor-layout-with-panel">
+        <div className="editor-main">
+          <Toolbar
+            editor={editor}
+            onToggleVersions={() => { setShowVersions((v) => !v) }}
+            onExportMarkdown={() => exportMarkdown(editor)}
+            onToggleDark={toggleDark}
+            dark={dark}
+          />
+          <BubbleToolbar editor={editor} />
+          <EditorContent editor={editor} />
+          <StatusBar editor={editor} />
+          {shortcutsState && (
+            <>
+              <CommandPalette editor={editor} state={shortcutsState} />
+              <DiffView editor={editor} state={shortcutsState} />
+            </>
+          )}
+        </div>
+
+        <AISidebar editor={editor} />
+
+        {showVersions && (
+          <VersionPanel
+            versions={versions}
+            onRestore={restore}
+            onSnapshot={snapshotNow}
+            onClose={() => setShowVersions(false)}
+          />
         )}
+
+        <AICommandPalette editor={editor} />
+        <ShortcutCheatsheet />
       </div>
-
-      <AISidebar editor={editor} />
-
-      {showVersions && (
-        <VersionPanel
-          versions={versions}
-          onRestore={restore}
-          onSnapshot={snapshotNow}
-          onClose={() => setShowVersions(false)}
-        />
-      )}
-
-      <ShortcutCheatsheet />
-    </div>
+    </AIProvider>
   )
 }

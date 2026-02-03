@@ -1,4 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
+import Anthropic from '@anthropic-ai/sdk'
+
+const client = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+  timeout: 30000, // 30 second timeout
+})
 
 const TONE_PROMPTS: Record<string, string> = {
   formal: 'Rewrite the following text in a formal, professional tone. Preserve meaning exactly. Output ONLY the rewritten text.',
@@ -9,21 +15,15 @@ const TONE_PROMPTS: Record<string, string> = {
 }
 
 export async function POST(req: NextRequest) {
-  const { tone, text, documentContext } = await req.json()
+  try {
+    const { tone, text, documentContext } = await req.json()
 
-  const systemPrompt = TONE_PROMPTS[tone]
-  if (!systemPrompt) {
-    return NextResponse.json({ error: 'Unknown tone' }, { status: 400 })
-  }
+    const systemPrompt = TONE_PROMPTS[tone]
+    if (!systemPrompt) {
+      return NextResponse.json({ error: 'Unknown tone' }, { status: 400 })
+    }
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': process.env.ANTHROPIC_API_KEY!,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
+    const response = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1024,
       system: systemPrompt,
@@ -33,14 +33,12 @@ export async function POST(req: NextRequest) {
           content: `Document context:\n${documentContext}\n\nText to rewrite:\n${text}`,
         },
       ],
-    }),
-  })
+    })
 
-  if (!res.ok) {
-    const err = await res.text()
-    return NextResponse.json({ error: err }, { status: res.status })
+    const result = response.content[0]?.type === 'text' ? response.content[0].text : ''
+    return NextResponse.json({ result })
+  } catch (e: any) {
+    console.error('[rewrite] Error:', e)
+    return NextResponse.json({ error: e.message }, { status: 500 })
   }
-
-  const data = await res.json()
-  return NextResponse.json({ result: data.content?.[0]?.text ?? '' })
 }

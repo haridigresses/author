@@ -123,6 +123,10 @@ body {
   @apply bg-purple-100 rounded-sm;
 }
 
+.mencken-transition {
+  @apply bg-orange-100 rounded-sm;
+}
+
 /* Additional editor element styles */
 .ProseMirror blockquote {
   @apply border-l-4 border-gray-300 pl-4 my-4 text-gray-600 italic;
@@ -350,7 +354,11 @@ body {
 
 /* AI Sidebar */
 .ai-sidebar {
-  @apply w-80 border-l border-gray-200 bg-white flex flex-col overflow-y-auto;
+  @apply w-80 border-l border-gray-200 bg-white flex flex-col overflow-y-auto transition-all duration-200;
+}
+
+.ai-sidebar-expanded {
+  @apply w-[500px];
 }
 
 .ai-sidebar-header {
@@ -363,6 +371,10 @@ body {
 
 .ai-sidebar-close {
   @apply w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded hover:bg-gray-100;
+}
+
+.ai-collapse-btn {
+  @apply w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded hover:bg-gray-100 text-sm;
 }
 
 .ai-sidebar-body {
@@ -431,6 +443,435 @@ body {
 
 .ai-apply-btn {
   @apply mt-2 w-full px-3 py-1.5 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 transition-colors;
+}
+
+.ai-result-close {
+  @apply float-right w-5 h-5 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded hover:bg-gray-200 text-sm -mt-1 -mr-1;
+}
+
+.ai-edit-result {
+  @apply bg-gray-50 rounded p-3 text-sm border border-gray-200 mt-2;
+}
+
+.ai-edit-result pre {
+  @apply whitespace-pre-wrap text-xs leading-relaxed;
+}
+
+/* Chips */
+.ai-subsection {
+  @apply flex flex-col gap-1;
+}
+
+.ai-subsection-label {
+  @apply text-xs text-gray-500;
+}
+
+.ai-chip-row {
+  @apply flex flex-wrap gap-1;
+}
+
+.ai-chip {
+  @apply px-2 py-1 text-xs border border-gray-300 rounded-full hover:bg-gray-50 hover:border-gray-400 transition-colors;
+}
+
+.ai-chip:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+/* Edit groups */
+.ai-edit-groups {
+  @apply flex flex-col gap-1;
+}
+
+.ai-edit-group {
+  @apply flex flex-col;
+}
+
+.ai-edit-group-btn {
+  @apply flex items-center justify-between px-3 py-2 text-xs font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-left;
+}
+
+.ai-edit-group-btn-active {
+  @apply bg-gray-50 border-gray-400 rounded-b-none;
+}
+
+.ai-edit-group-btn:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+.ai-edit-group-arrow {
+  @apply text-[10px] text-gray-400;
+}
+
+.ai-edit-group-options {
+  @apply flex flex-wrap gap-1 p-2 border border-t-0 border-gray-300 rounded-b-lg bg-gray-50;
+}
+
+/* Explore section */
+.ai-explore-section {
+  @apply flex-1 flex flex-col min-h-0;
+}
+
+.ai-explore-messages {
+  @apply flex flex-col gap-2 overflow-y-auto mb-3 flex-1 min-h-[100px] max-h-[400px];
+}
+
+.ai-explore-message {
+  @apply text-xs p-2 rounded-lg leading-relaxed whitespace-pre-wrap;
+}
+
+.ai-explore-user {
+  @apply bg-blue-100 text-blue-900 self-end max-w-[85%];
+}
+
+.ai-explore-assistant {
+  @apply bg-gray-100 text-gray-800 self-start;
+}
+
+.ai-explore-loading {
+  @apply text-xs text-gray-400 animate-pulse self-start;
+}
+
+.ai-explore-input-row {
+  @apply flex gap-1 mb-3;
+}
+
+.ai-explore-input {
+  @apply flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100;
+}
+
+.ai-explore-send {
+  @apply px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium;
+}
+
+.ai-explore-send:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+.ai-explore-clear {
+  @apply text-xs text-gray-400 hover:text-gray-600 mt-2 self-center;
+}
+
+/* Prompt groups */
+.ai-prompt-groups {
+  @apply flex flex-col gap-2;
+}
+
+.ai-prompt-group {
+  @apply flex flex-col gap-1;
+}
+
+.ai-prompt-group-label {
+  @apply text-xs text-gray-500 font-medium;
+}
+
+/* AI Command Palette */
+.ai-palette-overlay {
+  @apply fixed inset-0 bg-black/40 z-50 flex items-start justify-center pt-[15vh];
+}
+
+.ai-palette {
+  @apply bg-white rounded-xl shadow-2xl w-[480px] max-h-[70vh] flex flex-col overflow-hidden;
+}
+
+.ai-palette-expanded {
+  @apply w-[600px];
+}
+
+.ai-palette-header {
+  @apply flex items-center justify-between px-4 py-3 border-b border-gray-100;
+}
+
+.ai-palette-mode {
+  @apply text-sm font-medium text-gray-700;
+}
+
+.ai-palette-shortcut {
+  @apply text-xs font-mono bg-gray-100 px-1.5 py-0.5 rounded text-gray-500;
+}
+
+.ai-palette-content {
+  @apply flex flex-col p-3 gap-3 overflow-y-auto;
+}
+
+.ai-palette-groups {
+  @apply flex flex-col gap-1;
+}
+
+.ai-palette-group {
+  @apply flex flex-col;
+}
+
+.ai-palette-group-btn {
+  @apply flex items-center justify-between px-3 py-2 text-sm font-medium border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left;
+}
+
+.ai-palette-group-btn-active {
+  @apply bg-gray-50 border-gray-300 rounded-b-none;
+}
+
+.ai-palette-group-btn:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+.ai-palette-group-arrow {
+  @apply text-[10px] text-gray-400;
+}
+
+.ai-palette-group-options {
+  @apply flex flex-wrap gap-1.5 p-2 border border-t-0 border-gray-200 rounded-b-lg bg-gray-50;
+}
+
+.ai-palette-chip {
+  @apply px-2.5 py-1 text-xs border border-gray-300 rounded-full hover:bg-white hover:border-gray-400 transition-colors;
+}
+
+.ai-palette-chip:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+.ai-palette-loading {
+  @apply text-sm text-gray-400 animate-pulse py-2;
+}
+
+.ai-palette-result {
+  @apply bg-gray-50 rounded-lg p-3 border border-gray-200;
+}
+
+.ai-palette-result pre {
+  @apply whitespace-pre-wrap text-sm leading-relaxed mb-3 max-h-48 overflow-y-auto;
+}
+
+.ai-palette-result-actions {
+  @apply flex gap-2;
+}
+
+.ai-palette-apply {
+  @apply flex-1 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition-colors;
+}
+
+.ai-palette-dismiss {
+  @apply flex-1 px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition-colors;
+}
+
+/* Explore input */
+.ai-palette-input-row {
+  @apply flex gap-2;
+}
+
+.ai-palette-input {
+  @apply flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100;
+}
+
+.ai-palette-send {
+  @apply px-3 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors font-medium;
+}
+
+.ai-palette-send:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+/* Explore messages */
+.ai-palette-messages {
+  @apply flex flex-col gap-2 max-h-64 overflow-y-auto;
+}
+
+.ai-palette-message {
+  @apply text-sm p-2.5 rounded-lg leading-relaxed whitespace-pre-wrap;
+}
+
+.ai-palette-message-user {
+  @apply bg-blue-100 text-blue-900 self-end max-w-[85%];
+}
+
+.ai-palette-message-assistant {
+  @apply bg-gray-100 text-gray-800 self-start;
+}
+
+.ai-palette-clear {
+  @apply text-xs text-gray-400 hover:text-gray-600 self-center mt-1;
+}
+
+.ai-palette-custom-input {
+  @apply flex gap-2;
+}
+
+.ai-palette-ask-btn {
+  @apply w-full px-3 py-2 text-sm text-left border border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-gray-400 hover:text-gray-700 transition-colors;
+}
+
+/* AI Chat in Sidebar */
+.ai-chat {
+  @apply flex flex-col flex-1 min-h-0;
+}
+
+.ai-chat-messages {
+  @apply flex flex-col gap-3 overflow-y-auto flex-1 min-h-[100px] max-h-[500px] pb-3;
+}
+
+.ai-chat-message {
+  @apply flex flex-col gap-2;
+}
+
+.ai-chat-user {
+  @apply self-end max-w-[90%];
+}
+
+.ai-chat-user .ai-chat-content {
+  @apply bg-blue-100 text-blue-900 text-sm p-3 rounded-lg rounded-br-sm leading-relaxed whitespace-pre-wrap;
+}
+
+.ai-chat-assistant {
+  @apply self-start max-w-[95%];
+}
+
+.ai-chat-assistant .ai-chat-content {
+  @apply bg-gray-100 text-gray-800 text-sm p-3 rounded-lg rounded-bl-sm leading-relaxed whitespace-pre-wrap;
+}
+
+.ai-chat-loading {
+  @apply text-sm text-gray-400 animate-pulse;
+}
+
+.ai-insert-actions {
+  @apply flex gap-2 mt-2;
+}
+
+.ai-insert-btn {
+  @apply px-3 py-1.5 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors font-medium;
+}
+
+.ai-reject-btn {
+  @apply px-3 py-1.5 bg-gray-200 text-gray-700 text-xs rounded hover:bg-gray-300 transition-colors;
+}
+
+/* Track changes toggle */
+.ai-track-toggle {
+  @apply flex items-center gap-1.5 text-xs text-gray-500 cursor-pointer select-none;
+}
+
+.ai-track-toggle input {
+  @apply w-3 h-3 accent-blue-600;
+}
+
+/* Diff view */
+.ai-chat-diff {
+  @apply bg-gray-50 rounded-lg p-3 border border-gray-200;
+}
+
+.diff-view-container {
+  @apply text-sm leading-relaxed;
+}
+
+.diff-content {
+  @apply whitespace-pre-wrap;
+}
+
+.diff-equal {
+  @apply text-gray-700;
+}
+
+.diff-insert {
+  @apply bg-green-100 text-green-800 rounded-sm px-0.5;
+}
+
+.diff-delete {
+  @apply bg-red-100 text-red-800 line-through rounded-sm px-0.5;
+}
+
+.diff-no-changes {
+  @apply text-gray-400 text-sm italic;
+}
+
+/* Dark mode: Diff view */
+.dark .ai-chat-diff {
+  @apply bg-gray-900 border-gray-700;
+}
+
+.dark .diff-equal {
+  @apply text-gray-300;
+}
+
+.dark .diff-insert {
+  @apply bg-green-900 text-green-200;
+}
+
+.dark .diff-delete {
+  @apply bg-red-900 text-red-200;
+}
+
+.dark .ai-reject-btn {
+  @apply bg-gray-700 text-gray-300 hover:bg-gray-600;
+}
+
+.dark .ai-track-toggle {
+  @apply text-gray-400;
+}
+
+.ai-chat-input-container {
+  @apply flex gap-2 pt-3 border-t border-gray-200;
+}
+
+.ai-chat-input {
+  @apply flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100;
+}
+
+.ai-chat-send {
+  @apply px-3 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors font-medium;
+}
+
+.ai-chat-send:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+.ai-header-actions {
+  @apply flex items-center gap-2;
+}
+
+.ai-clear-btn {
+  @apply text-xs text-gray-400 hover:text-gray-600;
+}
+
+/* Dark mode: AI Chat */
+.dark .ai-chat-user .ai-chat-content {
+  @apply bg-blue-900 text-blue-100;
+}
+
+.dark .ai-chat-assistant .ai-chat-content {
+  @apply bg-gray-700 text-gray-200;
+}
+
+.dark .ai-chat-input-container {
+  @apply border-gray-700;
+}
+
+.dark .ai-chat-input {
+  @apply bg-gray-900 border-gray-600 text-gray-200;
+}
+
+.dark .ai-chat-send {
+  @apply border-gray-600 text-gray-300 hover:bg-gray-700;
+}
+
+.dark .ai-clear-btn {
+  @apply text-gray-500 hover:text-gray-300;
+}
+
+/* Sidebar empty state */
+.ai-empty-state {
+  @apply flex flex-col items-center justify-center text-center py-8 px-4;
+}
+
+.ai-empty-state p {
+  @apply text-sm text-gray-500 mb-2;
+}
+
+.ai-empty-state kbd {
+  @apply text-xs font-mono bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200;
+}
+
+.ai-empty-hint {
+  @apply text-xs text-gray-400 max-w-[200px];
 }
 
 /* Version panel */
@@ -620,6 +1061,111 @@ body {
 
 .dark .ai-sidebar-result {
   @apply bg-gray-900 border-gray-700;
+}
+
+.dark .ai-edit-result {
+  @apply bg-gray-900 border-gray-700;
+}
+
+.dark .ai-chip {
+  @apply border-gray-600 text-gray-300 hover:bg-gray-700 hover:border-gray-500;
+}
+
+.dark .ai-explore-user {
+  @apply bg-blue-900 text-blue-100;
+}
+
+.dark .ai-explore-assistant {
+  @apply bg-gray-700 text-gray-200;
+}
+
+.dark .ai-explore-input {
+  @apply bg-gray-800 border-gray-600 text-gray-200;
+}
+
+.dark .ai-explore-send {
+  @apply border-gray-600 text-gray-300 hover:bg-gray-700;
+}
+
+.dark .ai-result-close {
+  @apply text-gray-500 hover:text-gray-300 hover:bg-gray-700;
+}
+
+.dark .ai-collapse-btn {
+  @apply text-gray-500 hover:text-gray-300 hover:bg-gray-700;
+}
+
+.dark .ai-edit-group-btn {
+  @apply border-gray-600 text-gray-300 hover:bg-gray-700;
+}
+
+.dark .ai-edit-group-btn-active {
+  @apply bg-gray-700 border-gray-500;
+}
+
+.dark .ai-edit-group-options {
+  @apply border-gray-600 bg-gray-800;
+}
+
+/* Dark mode: AI Palette */
+.dark .ai-palette {
+  @apply bg-gray-800;
+}
+
+.dark .ai-palette-header {
+  @apply border-gray-700;
+}
+
+.dark .ai-palette-mode {
+  @apply text-gray-300;
+}
+
+.dark .ai-palette-shortcut {
+  @apply bg-gray-700 text-gray-400;
+}
+
+.dark .ai-palette-group-btn {
+  @apply border-gray-600 text-gray-300 hover:bg-gray-700;
+}
+
+.dark .ai-palette-group-btn-active {
+  @apply bg-gray-700 border-gray-500;
+}
+
+.dark .ai-palette-group-options {
+  @apply border-gray-600 bg-gray-900;
+}
+
+.dark .ai-palette-chip {
+  @apply border-gray-600 text-gray-300 hover:bg-gray-800 hover:border-gray-500;
+}
+
+.dark .ai-palette-result {
+  @apply bg-gray-900 border-gray-700;
+}
+
+.dark .ai-palette-input {
+  @apply bg-gray-900 border-gray-600 text-gray-200;
+}
+
+.dark .ai-palette-send {
+  @apply border-gray-600 text-gray-300 hover:bg-gray-700;
+}
+
+.dark .ai-palette-message-user {
+  @apply bg-blue-900 text-blue-100;
+}
+
+.dark .ai-palette-message-assistant {
+  @apply bg-gray-700 text-gray-200;
+}
+
+.dark .ai-palette-ask-btn {
+  @apply border-gray-600 text-gray-400 hover:border-gray-500 hover:text-gray-300;
+}
+
+.dark .ai-empty-state kbd {
+  @apply bg-gray-700 border-gray-600;
 }
 
 .dark .version-panel {

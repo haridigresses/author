@@ -5,7 +5,7 @@ import { Decoration, DecorationSet } from '@tiptap/pm/view'
 const menckenKey = new PluginKey('mencken')
 
 interface Issue {
-  type: 'long-sentence' | 'very-long-sentence' | 'passive' | 'adverb' | 'complex-word'
+  type: 'long-sentence' | 'very-long-sentence' | 'passive' | 'adverb' | 'complex-word' | 'weak-transition'
   from: number
   to: number
   message: string
@@ -23,6 +23,15 @@ const PASSIVE_REGEX = /\b(is|are|was|were|be|been|being)\s+(\w+ed|built|chosen|d
 
 const ADVERB_REGEX = /\b\w+ly\b/gi
 const ADVERB_EXCEPTIONS = new Set(['family', 'early', 'only', 'belly', 'fly', 'apply', 'reply', 'supply', 'holy', 'ally', 'rally', 'tally', 'bully', 'fully', 'jolly', 'jelly', 'lily', 'lonely', 'lovely', 'ugly', 'likely', 'friendly', 'daily', 'weekly', 'monthly', 'yearly'])
+
+// Weak transition phrases that often indicate a janky transition
+const WEAK_TRANSITIONS = [
+  'also', 'and so', 'anyway', 'as i said', 'as mentioned', 'as such', 'basically',
+  'by the way', 'in any case', 'in other words', 'it is important to note',
+  'it should be noted', 'moving on', 'needless to say', 'now', 'on another note',
+  'so basically', 'speaking of', 'that being said', 'that said', 'this brings us to',
+  'to be sure', 'well', 'with that in mind', 'you see',
+]
 
 function analyzeText(text: string, offset: number): Issue[] {
   const issues: Issue[] = []
@@ -63,6 +72,25 @@ function analyzeText(text: string, offset: number): Issue[] {
     }
   }
 
+  // Check for weak transitions at the start of sentences
+  for (const sentence of sentences) {
+    const sentenceStart = text.indexOf(sentence, 0)
+    const trimmedSentence = sentence.trimStart().toLowerCase()
+
+    for (const transition of WEAK_TRANSITIONS) {
+      if (trimmedSentence.startsWith(transition + ' ') || trimmedSentence.startsWith(transition + ',')) {
+        const leadingSpace = sentence.length - sentence.trimStart().length
+        issues.push({
+          type: 'weak-transition',
+          from: offset + sentenceStart + leadingSpace,
+          to: offset + sentenceStart + leadingSpace + transition.length,
+          message: `Weak transition: "${transition}" — consider a stronger connection`,
+        })
+        break
+      }
+    }
+  }
+
   return issues
 }
 
@@ -72,6 +100,7 @@ const ISSUE_CLASSES: Record<string, string> = {
   passive: 'mencken-passive',
   adverb: 'mencken-adverb',
   'complex-word': 'mencken-complex',
+  'weak-transition': 'mencken-transition',
 }
 
 export const MenckenExtension = Extension.create({

@@ -77,6 +77,26 @@ export function CommandPalette({ editor, state }: CommandPaletteProps) {
 }
 
 export function DiffView({ editor, state }: CommandPaletteProps) {
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!state.showDiff || state.loading) return
+
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        editor.commands.acceptEditingSuggestion()
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        editor.commands.rejectEditingSuggestion()
+      }
+    }
+
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [editor, state.showDiff, state.loading])
+
   if (!state.showDiff) return null
 
   const pos = state.palettePos
