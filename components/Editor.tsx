@@ -28,6 +28,7 @@ import {
 } from './extensions/HighlightShortcutsExtension'
 import { SlashCommandExtension } from './extensions/SlashCommandExtension'
 import { FixedHeaderExtension } from './extensions/FixedHeaderExtension'
+import { TrackChanges, InsertionMark, DeletionMark } from '../extensions/TrackChanges'
 import Toolbar from './Toolbar'
 import StatusBar from './StatusBar'
 import BubbleToolbar from './BubbleToolbar'
@@ -46,6 +47,7 @@ import { useEffect, useState } from 'react'
 export default function Editor() {
   const [shortcutsState, setShortcutsState] = useState<HighlightShortcutsState | null>(null)
   const [showVersions, setShowVersions] = useState(false)
+  const [trackChangesEnabled, setTrackChangesEnabled] = useState(false)
   const { dark, toggle: toggleDark } = useDarkMode()
 
   const editor = useEditor({
@@ -83,6 +85,11 @@ export default function Editor() {
       HighlightShortcutsExtension,
       SlashCommandExtension,
       FixedHeaderExtension,
+      InsertionMark,
+      DeletionMark,
+      TrackChanges.configure({
+        onToggle: setTrackChangesEnabled,
+      }),
     ],
     content: '<h1></h1><h3></h3><p></p>',
     editorProps: {
@@ -172,6 +179,8 @@ export default function Editor() {
             onExportMarkdown={() => exportMarkdown(editor)}
             onToggleDark={toggleDark}
             dark={dark}
+            trackChangesEnabled={trackChangesEnabled}
+            onToggleTrackChanges={() => editor.commands.toggleTrackChanges()}
           />
           <BubbleToolbar editor={editor} />
           <EditorContent editor={editor} />

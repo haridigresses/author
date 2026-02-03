@@ -97,6 +97,24 @@ body {
   @apply w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin;
 }
 
+/* Track Changes - insertion and deletion marks */
+.ProseMirror ins {
+  @apply bg-green-100 text-green-800 no-underline;
+  text-decoration: none;
+}
+
+.ProseMirror del {
+  @apply bg-red-100 text-red-600 line-through;
+}
+
+.dark .ProseMirror ins {
+  @apply bg-green-900/40 text-green-300;
+}
+
+.dark .ProseMirror del {
+  @apply bg-red-900/40 text-red-400;
+}
+
 /* Ghost text (tab completion) */
 .ghost-text {
   @apply text-gray-400 pointer-events-none;
@@ -745,7 +763,24 @@ body {
   @apply px-3 py-1.5 bg-gray-200 text-gray-700 text-xs rounded hover:bg-gray-300 transition-colors;
 }
 
-/* Track changes toggle */
+/* Track changes toggle bar */
+.ai-diff-toggle-bar {
+  @apply px-3 py-2 border-b border-gray-200 bg-gray-50 flex flex-col gap-2;
+}
+
+.ai-diff-label {
+  @apply text-xs text-gray-500 truncate;
+}
+
+.ai-diff-toggle-btn {
+  @apply w-full px-3 py-1.5 text-xs font-medium rounded border border-gray-300 bg-white hover:bg-gray-100 transition-colors;
+}
+
+.ai-diff-toggle-active {
+  @apply bg-blue-50 border-blue-300 text-blue-700 hover:bg-blue-100;
+}
+
+/* Legacy toggle (keep for reference) */
 .ai-track-toggle {
   @apply flex items-center gap-1.5 text-xs text-gray-500 cursor-pointer select-none;
 }
@@ -806,6 +841,18 @@ body {
 
 .dark .ai-track-toggle {
   @apply text-gray-400;
+}
+
+.dark .ai-diff-toggle-bar {
+  @apply border-gray-700 bg-gray-800;
+}
+
+.dark .ai-diff-toggle-btn {
+  @apply border-gray-600 bg-gray-700 text-gray-300 hover:bg-gray-600;
+}
+
+.dark .ai-diff-toggle-active {
+  @apply bg-blue-900 border-blue-700 text-blue-300 hover:bg-blue-800;
 }
 
 .ai-chat-input-container {

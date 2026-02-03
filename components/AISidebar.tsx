@@ -102,16 +102,6 @@ export default function AISidebar({ editor }: AISidebarProps) {
       <div className="ai-sidebar-header">
         <h3>AI Assistant</h3>
         <div className="ai-header-actions">
-          {selectionContext && (
-            <label className="ai-track-toggle" title="Show changes">
-              <input
-                type="checkbox"
-                checked={trackChanges}
-                onChange={(e) => setTrackChanges(e.target.checked)}
-              />
-              <span>Diff</span>
-            </label>
-          )}
           {messages.length > 0 && (
             <button className="ai-clear-btn" onClick={clearMessages} title="Clear conversation">
               Clear
@@ -124,6 +114,20 @@ export default function AISidebar({ editor }: AISidebarProps) {
           )}
         </div>
       </div>
+
+      {/* Track changes toggle - show when we have insertable content */}
+      {insertableContent && (
+        <div className="ai-diff-toggle-bar">
+          <span className="ai-diff-label">Original: {originalText ? `"${originalText.slice(0, 30)}..."` : '(none)'}</span>
+          <button
+            className={`ai-diff-toggle-btn ${trackChanges ? 'ai-diff-toggle-active' : ''}`}
+            onClick={() => setTrackChanges(!trackChanges)}
+            disabled={!originalText}
+          >
+            {trackChanges ? 'Hide changes' : 'Show changes'}
+          </button>
+        </div>
+      )}
 
       <div className="ai-sidebar-body">
         {/* Chat Messages */}

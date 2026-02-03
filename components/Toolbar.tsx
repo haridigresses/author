@@ -9,6 +9,8 @@ interface ToolbarProps {
   onExportMarkdown: () => void
   onToggleDark: () => void
   dark: boolean
+  trackChangesEnabled: boolean
+  onToggleTrackChanges: () => void
 }
 
 function Btn({
@@ -40,7 +42,7 @@ function Sep() {
   return <div className="toolbar-separator" />
 }
 
-export default function Toolbar({ editor, onToggleVersions, onExportMarkdown, onToggleDark, dark }: ToolbarProps) {
+export default function Toolbar({ editor, onToggleVersions, onExportMarkdown, onToggleDark, dark, trackChangesEnabled, onToggleTrackChanges }: ToolbarProps) {
   const [menckenEnabled, setMenckenEnabled] = useState(false)
   const [tabCompleteEnabled, setTabCompleteEnabled] = useState(false)
   const [imagePrompt, setImagePrompt] = useState('')
@@ -133,6 +135,10 @@ export default function Toolbar({ editor, onToggleVersions, onExportMarkdown, on
       <div className="flex-1" />
 
       {/* Toggles */}
+      <label className="toolbar-toggle" title="Track Changes - show edits as revisions">
+        <input type="checkbox" checked={trackChangesEnabled} onChange={onToggleTrackChanges} />
+        Track
+      </label>
       <label className="toolbar-toggle">
         <input type="checkbox" checked={tabCompleteEnabled} onChange={(e) => { setTabCompleteEnabled(e.target.checked); editor.commands.toggleTabComplete(e.target.checked) }} />
         Tab
