@@ -33,6 +33,10 @@ interface AIContextType {
   // Sidebar expanded state
   sidebarExpanded: boolean
   setSidebarExpanded: (expanded: boolean) => void
+
+  // Command palette open state (to hide bubble menu)
+  commandPaletteOpen: boolean
+  setCommandPaletteOpen: (open: boolean) => void
 }
 
 const AIContext = createContext<AIContextType | null>(null)
@@ -44,6 +48,7 @@ export function AIProvider({ children }: { children: ReactNode }) {
   const [selectionContext, setSelectionContextState] = useState<{ text: string; docContent: string } | null>(null)
   const [trackChanges, setTrackChangesState] = useState(true) // Default on
   const [sidebarExpanded, setSidebarExpanded] = useState(false)
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
 
   const setLoading = useCallback((value: boolean) => {
     setLoadingState(value)
@@ -90,6 +95,8 @@ export function AIProvider({ children }: { children: ReactNode }) {
       setTrackChanges,
       sidebarExpanded,
       setSidebarExpanded,
+      commandPaletteOpen,
+      setCommandPaletteOpen,
     }}>
       {children}
     </AIContext.Provider>

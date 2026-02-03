@@ -31,7 +31,6 @@ import { FixedHeaderExtension } from './extensions/FixedHeaderExtension'
 import { TrackChanges, InsertionMark, DeletionMark } from '../extensions/TrackChanges'
 import Toolbar from './Toolbar'
 import StatusBar from './StatusBar'
-import BubbleToolbar from './BubbleToolbar'
 import { CommandPalette, DiffView } from './CommandPalette'
 import ShortcutCheatsheet from './ShortcutCheatsheet'
 import { AIProvider } from './AIContext'
@@ -63,12 +62,23 @@ export default function Editor() {
       Highlight.configure({ multicolor: true }),
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
       Placeholder.configure({
-        showOnlyCurrent: false,
+        showOnlyCurrent: true,
+        includeChildren: false,
         placeholder: ({ node }) => {
+          // Only show placeholder for headings and top-level paragraphs
           if (node.type.name === 'heading' && node.attrs.level === 1) return 'Title'
           if (node.type.name === 'heading' && node.attrs.level === 3) return 'Subtitle'
           if (node.type.name === 'heading') return `Heading ${node.attrs.level}`
-          return 'Start writing... (/ for commands, ⌘K for AI)'
+          // Don't show placeholder in list items, task items, blockquotes, etc.
+          if (node.type.name === 'listItem') return ''
+          if (node.type.name === 'taskItem') return ''
+          if (node.type.name === 'blockquote') return ''
+          if (node.type.name === 'codeBlock') return ''
+          if (node.type.name === 'tableCell') return ''
+          if (node.type.name === 'tableHeader') return ''
+          // Only show on regular paragraphs
+          if (node.type.name === 'paragraph') return 'Type / for commands, ⌘K for AI'
+          return ''
         },
       }),
       Typography,
@@ -182,7 +192,6 @@ export default function Editor() {
             trackChangesEnabled={trackChangesEnabled}
             onToggleTrackChanges={() => editor.commands.toggleTrackChanges()}
           />
-          <BubbleToolbar editor={editor} />
           <EditorContent editor={editor} />
           <StatusBar editor={editor} />
           {shortcutsState && (

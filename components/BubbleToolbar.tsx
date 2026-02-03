@@ -1,14 +1,28 @@
 'use client'
 
 import { BubbleMenu, Editor } from '@tiptap/react'
+import { useAI } from './AIContext'
 
 interface BubbleToolbarProps {
   editor: Editor
 }
 
 export default function BubbleToolbar({ editor }: BubbleToolbarProps) {
+  const { commandPaletteOpen } = useAI()
+
   return (
-    <BubbleMenu editor={editor} tippyOptions={{ duration: 150 }} className="bubble-menu">
+    <BubbleMenu
+      editor={editor}
+      tippyOptions={{ duration: 150 }}
+      className="bubble-menu"
+      shouldShow={({ editor }) => {
+        // Hide if command palette is open
+        if (commandPaletteOpen) return false
+        // Otherwise show if there's a text selection
+        const { from, to } = editor.state.selection
+        return from !== to
+      }}
+    >
       <button
         onClick={() => editor.chain().focus().toggleBold().run()}
         className={editor.isActive('bold') ? 'bubble-btn bubble-btn-active' : 'bubble-btn'}

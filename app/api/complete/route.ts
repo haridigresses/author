@@ -11,8 +11,8 @@ export async function POST(req: NextRequest) {
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 150,
+      model: 'claude-3-5-haiku-20241022',
+      max_tokens: 100,
       system: `You are an inline writing autocomplete engine. Given the context of a long-form document and the text immediately before the cursor, predict what the author would write next. Output ONLY the completion text — no quotes, no explanation, no preamble. Keep completions to 1-2 sentences max. Match the author's tone, style, and vocabulary exactly.`,
       messages: [
         {

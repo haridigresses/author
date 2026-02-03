@@ -117,35 +117,50 @@ interface CommandListRef {
 
 const CommandList = forwardRef<CommandListRef, CommandListProps>(({ items, command }, ref) => {
   const [selectedIndex, setSelectedIndex] = useState(0)
+  const menuRef = React.useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setSelectedIndex(0)
   }, [items])
 
+  // Scroll selected item into view
+  useEffect(() => {
+    const menu = menuRef.current
+    if (!menu) return
+    const selected = menu.children[selectedIndex] as HTMLElement
+    if (selected) {
+      selected.scrollIntoView({ block: 'nearest' })
+    }
+  }, [selectedIndex])
+
   useImperativeHandle(ref, () => ({
     onKeyDown: ({ event }) => {
       if (event.key === 'ArrowUp') {
+        event.preventDefault()
         setSelectedIndex((i) => (i + items.length - 1) % items.length)
         return true
       }
       if (event.key === 'ArrowDown') {
+        event.preventDefault()
         setSelectedIndex((i) => (i + 1) % items.length)
         return true
       }
       if (event.key === 'Enter') {
+        event.preventDefault()
         const item = items[selectedIndex]
         if (item) command(item)
         return true
       }
       return false
     },
-  }))
+  }), [items, selectedIndex, command])
+
+  if (items.length === 0) {
+    return <div className="slash-menu"><div className="slash-menu-empty">No results</div></div>
+  }
 
   return (
-    <div className="slash-menu">
-      {items.length === 0 && (
-        <div className="slash-menu-empty">No results</div>
-      )}
+    <div className="slash-menu" ref={menuRef}>
       {items.map((item, index) => (
         <button
           key={item.title}
