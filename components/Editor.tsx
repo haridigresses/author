@@ -28,25 +28,28 @@ import {
 } from './extensions/HighlightShortcutsExtension'
 import { SlashCommandExtension } from './extensions/SlashCommandExtension'
 import { FixedHeaderExtension } from './extensions/FixedHeaderExtension'
+import { BlockSelectionExtension } from './extensions/BlockSelectionExtension'
 import { TrackChanges, InsertionMark, DeletionMark } from '../extensions/TrackChanges'
 import Toolbar from './Toolbar'
 import StatusBar from './StatusBar'
 import { CommandPalette, DiffView } from './CommandPalette'
 import ShortcutCheatsheet from './ShortcutCheatsheet'
 import { AIProvider } from './AIContext'
-import AISidebar from './AISidebar'
+import Sidebar from './Sidebar'
 import AICommandPalette from './AICommandPalette'
-import VersionPanel from './VersionPanel'
 import { useAutosave } from './hooks/useAutosave'
 import { useDarkMode } from './hooks/useDarkMode'
 import { useVersionHistory } from './hooks/useVersionHistory'
 import { exportMarkdown } from './hooks/useExportMarkdown'
 import { useEffect, useState } from 'react'
 
+type SidebarMode = 'ai' | 'mencken' | 'track'
+
 export default function Editor() {
   const [shortcutsState, setShortcutsState] = useState<HighlightShortcutsState | null>(null)
-  const [showVersions, setShowVersions] = useState(false)
   const [trackChangesEnabled, setTrackChangesEnabled] = useState(false)
+  const [menckenEnabled, setMenckenEnabled] = useState(false)
+  const [tabAIEnabled, setTabAIEnabled] = useState(false)
   const { dark, toggle: toggleDark } = useDarkMode()
 
   const editor = useEditor({
@@ -95,6 +98,7 @@ export default function Editor() {
       HighlightShortcutsExtension,
       SlashCommandExtension,
       FixedHeaderExtension,
+      BlockSelectionExtension,
       InsertionMark,
       DeletionMark,
       TrackChanges.configure({
@@ -177,6 +181,19 @@ export default function Editor() {
     }
   }, [editor])
 
+  // Handle Tab AI toggle
+  const handleToggleTabAI = (enabled: boolean) => {
+    setTabAIEnabled(enabled)
+    editor?.commands.toggleTabComplete(enabled)
+  }
+
+  // Determine sidebar mode based on active mode
+  const getSidebarMode = (): SidebarMode => {
+    if (menckenEnabled) return 'mencken'
+    if (trackChangesEnabled) return 'track'
+    return 'ai'
+  }
+
   if (!editor) return null
 
   return (
@@ -185,12 +202,16 @@ export default function Editor() {
         <div className="editor-main">
           <Toolbar
             editor={editor}
-            onToggleVersions={() => { setShowVersions((v) => !v) }}
             onExportMarkdown={() => exportMarkdown(editor)}
             onToggleDark={toggleDark}
             dark={dark}
             trackChangesEnabled={trackChangesEnabled}
             onToggleTrackChanges={() => editor.commands.toggleTrackChanges()}
+            menckenEnabled={menckenEnabled}
+            onToggleMencken={(enabled: boolean) => {
+              editor.commands.toggleMencken(enabled)
+              setMenckenEnabled(enabled)
+            }}
           />
           <EditorContent editor={editor} />
           <StatusBar editor={editor} />
@@ -202,16 +223,19 @@ export default function Editor() {
           )}
         </div>
 
-        <AISidebar editor={editor} />
-
-        {showVersions && (
-          <VersionPanel
-            versions={versions}
-            onRestore={restore}
-            onSnapshot={snapshotNow}
-            onClose={() => setShowVersions(false)}
-          />
-        )}
+        <Sidebar
+          editor={editor}
+          mode={getSidebarMode()}
+          tabAIEnabled={tabAIEnabled}
+          onToggleTabAI={handleToggleTabAI}
+          versions={versions}
+          onRestore={restore}
+          onSnapshot={snapshotNow}
+          onCloseMencken={() => {
+            editor.commands.toggleMencken(false)
+            setMenckenEnabled(false)
+          }}
+        />
 
         <AICommandPalette editor={editor} />
         <ShortcutCheatsheet />

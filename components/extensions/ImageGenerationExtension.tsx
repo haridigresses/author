@@ -68,9 +68,9 @@ export const ImageGenerationExtension = Node.create({
 
   addCommands() {
     return {
-      insertImageFromPrompt: (prompt: string) => ({ commands, state, editor }) => {
-        // Gather context from document
-        const documentContext = state.doc.textContent.slice(0, 1000)
+      insertImageFromPrompt: (prompt: string, context?: string) => ({ commands, state, editor }) => {
+        // Use provided context or fall back to document content
+        const documentContext = context || state.doc.textContent.slice(0, 1000)
 
         // Insert placeholder node
         const pos = state.selection.from
@@ -135,3 +135,11 @@ export const ImageGenerationExtension = Node.create({
     }
   },
 })
+
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    generatedImage: {
+      insertImageFromPrompt: (prompt: string, context?: string) => ReturnType
+    }
+  }
+}

@@ -120,6 +120,10 @@ body {
   @apply text-gray-400 pointer-events-none;
 }
 
+.ghost-text-loading {
+  @apply animate-pulse;
+}
+
 /* Hemingway highlights */
 .mencken-very-long {
   @apply bg-red-100 rounded-sm;
@@ -143,6 +147,35 @@ body {
 
 .mencken-transition {
   @apply bg-orange-100 rounded-sm;
+}
+
+/* Mencken legend in toolbar */
+.mencken-legend {
+  @apply flex items-center gap-1 ml-1;
+}
+
+.mencken-legend-item {
+  @apply text-[10px] px-1.5 py-0.5 rounded font-medium;
+}
+
+.mencken-legend-red {
+  @apply bg-red-100 text-red-700;
+}
+
+.mencken-legend-green {
+  @apply bg-green-100 text-green-700;
+}
+
+.mencken-legend-blue {
+  @apply bg-blue-100 text-blue-700;
+}
+
+.mencken-legend-purple {
+  @apply bg-purple-100 text-purple-700;
+}
+
+.mencken-legend-orange {
+  @apply bg-orange-100 text-orange-700;
 }
 
 /* Additional editor element styles */
@@ -280,6 +313,14 @@ body {
 
 .toolbar-btn-active {
   @apply bg-gray-200 border-gray-400;
+}
+
+.toolbar-btn-accept {
+  @apply border-green-400 text-green-700 hover:bg-green-50;
+}
+
+.toolbar-btn-reject {
+  @apply border-red-400 text-red-700 hover:bg-red-50;
 }
 
 .toolbar-separator {
@@ -452,7 +493,7 @@ body {
 
 /* AI Sidebar */
 .ai-sidebar {
-  @apply w-80 border-l border-gray-200 bg-white flex flex-col overflow-y-auto transition-all duration-200;
+  @apply w-80 h-full border-l border-gray-200 bg-white flex flex-col overflow-y-auto transition-all duration-200;
 }
 
 .ai-sidebar-expanded {
@@ -663,6 +704,92 @@ body {
   @apply text-xs text-gray-500 font-medium;
 }
 
+/* Link Modal */
+.link-modal-overlay {
+  @apply fixed inset-0 bg-black/50 z-50 flex items-center justify-center;
+}
+
+.link-modal {
+  @apply bg-white rounded-xl shadow-2xl w-[400px] overflow-hidden;
+}
+
+.link-modal-header {
+  @apply flex items-center justify-between px-4 py-3 border-b border-gray-200;
+}
+
+.link-modal-header h3 {
+  @apply text-base font-semibold;
+}
+
+.link-modal-close {
+  @apply w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 text-xl;
+}
+
+.link-modal-body {
+  @apply p-4 flex flex-col gap-4;
+}
+
+.link-modal-field {
+  @apply flex flex-col gap-1.5;
+}
+
+.link-modal-field label {
+  @apply text-sm font-medium text-gray-700;
+}
+
+.link-modal-input {
+  @apply px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100;
+}
+
+.link-modal-error {
+  @apply text-xs text-red-600;
+}
+
+.link-modal-footer {
+  @apply flex justify-end gap-2 px-4 py-3 bg-gray-50 border-t border-gray-200;
+}
+
+.link-modal-btn {
+  @apply px-4 py-2 text-sm font-medium rounded-lg transition-colors;
+}
+
+.link-modal-btn-cancel {
+  @apply text-gray-700 hover:bg-gray-200;
+}
+
+.link-modal-btn-submit {
+  @apply bg-blue-600 text-white hover:bg-blue-700;
+}
+
+/* Dark mode: Link Modal */
+.dark .link-modal {
+  @apply bg-gray-800;
+}
+
+.dark .link-modal-header {
+  @apply border-gray-700;
+}
+
+.dark .link-modal-close {
+  @apply text-gray-400 hover:text-gray-200 hover:bg-gray-700;
+}
+
+.dark .link-modal-field label {
+  @apply text-gray-300;
+}
+
+.dark .link-modal-input {
+  @apply bg-gray-900 border-gray-600 text-gray-200 focus:border-blue-500;
+}
+
+.dark .link-modal-footer {
+  @apply bg-gray-900 border-gray-700;
+}
+
+.dark .link-modal-btn-cancel {
+  @apply text-gray-300 hover:bg-gray-700;
+}
+
 /* AI Command Palette - Superhuman-style */
 .ai-palette-overlay {
   @apply fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-[12vh];
@@ -674,6 +801,14 @@ body {
 
 .ai-palette-header {
   @apply flex flex-col px-4 py-3 border-b border-gray-100 gap-2;
+}
+
+.ai-palette-back {
+  @apply self-start px-2 py-1 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors -ml-1 mb-1;
+}
+
+.ai-palette-image-hint {
+  @apply block text-gray-500 text-sm mb-2;
 }
 
 .ai-palette-search {
@@ -1084,6 +1219,14 @@ body {
   @apply bg-gray-700 border-gray-500;
 }
 
+.dark .toolbar-btn-accept {
+  @apply border-green-600 text-green-400 hover:bg-green-900/30;
+}
+
+.dark .toolbar-btn-reject {
+  @apply border-red-600 text-red-400 hover:bg-red-900/30;
+}
+
 .dark .toolbar-separator {
   @apply bg-gray-600;
 }
@@ -1353,4 +1496,542 @@ body {
 
 .dark .ghost-text {
   @apply text-gray-600;
+}
+
+/* Dark mode: Mencken legend */
+.dark .mencken-legend-red {
+  @apply bg-red-900/50 text-red-300;
+}
+
+.dark .mencken-legend-green {
+  @apply bg-green-900/50 text-green-300;
+}
+
+.dark .mencken-legend-blue {
+  @apply bg-blue-900/50 text-blue-300;
+}
+
+.dark .mencken-legend-purple {
+  @apply bg-purple-900/50 text-purple-300;
+}
+
+.dark .mencken-legend-orange {
+  @apply bg-orange-900/50 text-orange-300;
+}
+
+/* Mencken Panel */
+.mencken-panel {
+  @apply w-80 h-full bg-white border-l border-gray-200 flex flex-col overflow-hidden;
+}
+
+.mencken-panel-header {
+  @apply flex items-center justify-between px-4 py-3 border-b border-gray-200;
+}
+
+.mencken-panel-header h3 {
+  @apply text-base font-semibold text-gray-900;
+}
+
+.mencken-panel-close {
+  @apply text-gray-400 hover:text-gray-600 text-xl font-light leading-none;
+}
+
+.mencken-panel-legend {
+  @apply px-4 py-3 border-b border-gray-200;
+}
+
+.mencken-panel-legend h4 {
+  @apply text-xs font-medium text-gray-500 uppercase tracking-wide mb-2;
+}
+
+.mencken-legend-grid {
+  @apply grid grid-cols-2 gap-2;
+}
+
+.mencken-legend-item {
+  @apply flex items-center gap-2 text-sm;
+}
+
+.mencken-legend-dot {
+  @apply w-3 h-3 rounded-full flex-shrink-0;
+}
+
+.mencken-legend-label {
+  @apply text-gray-700 flex-1;
+}
+
+.mencken-legend-count {
+  @apply text-gray-400 text-xs;
+}
+
+.mencken-panel-summary {
+  @apply flex items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-200;
+}
+
+.mencken-panel-summary span {
+  @apply text-sm text-gray-600;
+}
+
+.mencken-analyze-btn {
+  @apply px-3 py-1 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.mencken-panel-issues {
+  @apply flex-1 overflow-y-auto p-3 space-y-2;
+}
+
+.mencken-empty {
+  @apply text-center text-gray-500 py-8;
+}
+
+.mencken-issue-card {
+  @apply bg-gray-50 rounded-lg p-3 border border-gray-200;
+}
+
+.mencken-issue-header {
+  @apply flex items-center gap-2 cursor-pointer mb-1;
+}
+
+.mencken-issue-badge {
+  @apply px-2 py-0.5 text-xs font-medium text-white rounded flex-shrink-0;
+}
+
+.mencken-issue-text {
+  @apply text-sm text-gray-800 truncate;
+}
+
+.mencken-issue-message {
+  @apply text-xs text-gray-500 mb-2;
+}
+
+.mencken-suggest-btn {
+  @apply text-xs text-blue-600 hover:text-blue-800 underline;
+}
+
+.mencken-issue-suggestion {
+  @apply mt-2 pt-2 border-t border-gray-200;
+}
+
+.mencken-suggestion-loading {
+  @apply text-xs text-gray-400 italic;
+}
+
+.mencken-suggestion-text {
+  @apply text-sm text-gray-700 mb-2 bg-green-50 p-2 rounded border border-green-200;
+}
+
+.mencken-apply-btn {
+  @apply px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700;
+}
+
+.mencken-more {
+  @apply text-center text-gray-500 text-sm py-2;
+}
+
+/* Dark mode: Mencken Panel */
+.dark .mencken-panel {
+  @apply bg-gray-900 border-gray-700;
+}
+
+.dark .mencken-panel-header {
+  @apply border-gray-700;
+}
+
+.dark .mencken-panel-header h3 {
+  @apply text-gray-100;
+}
+
+.dark .mencken-panel-close {
+  @apply text-gray-500 hover:text-gray-300;
+}
+
+.dark .mencken-panel-legend {
+  @apply border-gray-700;
+}
+
+.dark .mencken-panel-legend h4 {
+  @apply text-gray-400;
+}
+
+.dark .mencken-legend-label {
+  @apply text-gray-300;
+}
+
+.dark .mencken-legend-count {
+  @apply text-gray-500;
+}
+
+.dark .mencken-panel-summary {
+  @apply bg-gray-800 border-gray-700;
+}
+
+.dark .mencken-panel-summary span {
+  @apply text-gray-400;
+}
+
+.dark .mencken-issue-card {
+  @apply bg-gray-800 border-gray-700;
+}
+
+.dark .mencken-issue-text {
+  @apply text-gray-200;
+}
+
+.dark .mencken-issue-message {
+  @apply text-gray-400;
+}
+
+.dark .mencken-suggest-btn {
+  @apply text-blue-400 hover:text-blue-300;
+}
+
+.dark .mencken-issue-suggestion {
+  @apply border-gray-700;
+}
+
+.dark .mencken-suggestion-loading {
+  @apply text-gray-500;
+}
+
+.dark .mencken-suggestion-text {
+  @apply text-gray-200 bg-green-900/30 border-green-800;
+}
+
+.dark .mencken-empty {
+  @apply text-gray-500;
+}
+
+.dark .mencken-more {
+  @apply text-gray-500;
+}
+
+/* Tab AI Toggle in Sidebar */
+.ai-tab-toggle {
+  @apply px-4 py-3 border-b border-gray-200 bg-gray-50;
+}
+
+.ai-tab-toggle-label {
+  @apply flex items-center gap-3 cursor-pointer;
+}
+
+.ai-tab-toggle-input {
+  @apply sr-only;
+}
+
+.ai-tab-toggle-switch {
+  @apply relative w-10 h-5 bg-gray-300 rounded-full transition-colors;
+}
+
+.ai-tab-toggle-switch::after {
+  @apply content-[''] absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform;
+}
+
+.ai-tab-toggle-input:checked + .ai-tab-toggle-switch {
+  @apply bg-blue-600;
+}
+
+.ai-tab-toggle-input:checked + .ai-tab-toggle-switch::after {
+  @apply translate-x-5;
+}
+
+.ai-tab-toggle-text {
+  @apply text-sm font-medium text-gray-700;
+}
+
+.ai-tab-toggle-hint {
+  @apply block mt-1 text-xs text-gray-500;
+}
+
+/* Dark mode: Tab AI Toggle */
+.dark .ai-tab-toggle {
+  @apply bg-gray-800 border-gray-700;
+}
+
+.dark .ai-tab-toggle-switch {
+  @apply bg-gray-600;
+}
+
+.dark .ai-tab-toggle-text {
+  @apply text-gray-300;
+}
+
+.dark .ai-tab-toggle-hint {
+  @apply text-gray-500;
+}
+
+/* AI Image Generation */
+.ai-image-gen {
+  @apply px-4 py-3 border-b border-gray-200;
+}
+
+.ai-image-gen-header {
+  @apply flex items-center gap-2 mb-2;
+}
+
+.ai-image-gen-icon {
+  @apply text-base;
+}
+
+.ai-image-gen-title {
+  @apply text-sm font-medium text-gray-700;
+}
+
+.ai-image-gen-form {
+  @apply flex gap-2;
+}
+
+.ai-image-gen-input {
+  @apply flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+}
+
+.ai-image-gen-btn {
+  @apply px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+}
+
+.ai-image-gen-hint {
+  @apply block mt-1.5 text-xs text-gray-500;
+}
+
+/* Dark mode: AI Image Generation */
+.dark .ai-image-gen {
+  @apply border-gray-700;
+}
+
+.dark .ai-image-gen-title {
+  @apply text-gray-300;
+}
+
+.dark .ai-image-gen-input {
+  @apply bg-gray-800 border-gray-600 text-gray-200 placeholder-gray-500;
+}
+
+.dark .ai-image-gen-hint {
+  @apply text-gray-500;
+}
+
+/* Track Changes Panel */
+.track-panel {
+  @apply w-80 h-full bg-white border-l border-gray-200 flex flex-col overflow-hidden;
+}
+
+.track-panel-header {
+  @apply px-4 py-3 border-b border-gray-200;
+}
+
+.track-panel-header h3 {
+  @apply text-base font-semibold text-gray-900;
+}
+
+.track-panel-summary {
+  @apply px-4 py-3 border-b border-gray-200 bg-gray-50;
+}
+
+.track-summary-stats {
+  @apply flex gap-3 mb-2;
+}
+
+.track-stat {
+  @apply text-sm font-medium;
+}
+
+.track-stat-insertion {
+  @apply text-green-600;
+}
+
+.track-stat-deletion {
+  @apply text-red-600;
+}
+
+.track-summary-actions {
+  @apply flex gap-2;
+}
+
+.track-accept-all-btn {
+  @apply px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700;
+}
+
+.track-reject-all-btn {
+  @apply px-3 py-1.5 bg-red-600 text-white text-sm font-medium rounded hover:bg-red-700;
+}
+
+.track-panel-section {
+  @apply px-4 py-3 border-b border-gray-200;
+}
+
+.track-section-header {
+  @apply flex items-center justify-between mb-2;
+}
+
+.track-section-header h4 {
+  @apply text-xs font-medium text-gray-500 uppercase tracking-wide;
+}
+
+.track-snapshot-btn {
+  @apply text-xs text-blue-600 hover:text-blue-800;
+}
+
+.track-versions {
+  @apply space-y-1;
+}
+
+.track-version-item {
+  @apply flex items-center justify-between py-1.5 px-2 bg-gray-50 rounded text-sm;
+}
+
+.track-version-time {
+  @apply text-gray-600;
+}
+
+.track-restore-btn {
+  @apply text-xs text-blue-600 hover:text-blue-800;
+}
+
+.track-panel-changes {
+  @apply flex-1 overflow-y-auto;
+}
+
+.track-panel-changes h4 {
+  @apply text-xs font-medium text-gray-500 uppercase tracking-wide mb-2;
+}
+
+.track-changes-list {
+  @apply space-y-1;
+}
+
+.track-change-item {
+  @apply flex items-center justify-between py-2 px-2 rounded;
+}
+
+.track-change-insertion {
+  @apply bg-green-50;
+}
+
+.track-change-deletion {
+  @apply bg-red-50;
+}
+
+.track-change-text {
+  @apply flex items-center gap-2 cursor-pointer flex-1 min-w-0;
+}
+
+.track-change-badge {
+  @apply w-5 h-5 flex items-center justify-center text-xs font-bold rounded flex-shrink-0;
+}
+
+.track-badge-insertion {
+  @apply bg-green-600 text-white;
+}
+
+.track-badge-deletion {
+  @apply bg-red-600 text-white;
+}
+
+.track-change-content {
+  @apply text-sm text-gray-700 truncate;
+}
+
+.track-change-actions {
+  @apply flex gap-1 flex-shrink-0;
+}
+
+.track-change-accept {
+  @apply w-6 h-6 flex items-center justify-center text-green-600 hover:bg-green-100 rounded;
+}
+
+.track-change-reject {
+  @apply w-6 h-6 flex items-center justify-center text-red-600 hover:bg-red-100 rounded;
+}
+
+.track-empty {
+  @apply text-sm text-gray-500 text-center py-4;
+}
+
+.track-more {
+  @apply text-sm text-gray-500 text-center py-2;
+}
+
+/* Dark mode: Track Changes Panel */
+.dark .track-panel {
+  @apply bg-gray-900 border-gray-700;
+}
+
+.dark .track-panel-header {
+  @apply border-gray-700;
+}
+
+.dark .track-panel-header h3 {
+  @apply text-gray-100;
+}
+
+.dark .track-panel-summary {
+  @apply bg-gray-800 border-gray-700;
+}
+
+.dark .track-stat-insertion {
+  @apply text-green-400;
+}
+
+.dark .track-stat-deletion {
+  @apply text-red-400;
+}
+
+.dark .track-panel-section {
+  @apply border-gray-700;
+}
+
+.dark .track-section-header h4 {
+  @apply text-gray-400;
+}
+
+.dark .track-snapshot-btn {
+  @apply text-blue-400 hover:text-blue-300;
+}
+
+.dark .track-version-item {
+  @apply bg-gray-800;
+}
+
+.dark .track-version-time {
+  @apply text-gray-400;
+}
+
+.dark .track-restore-btn {
+  @apply text-blue-400 hover:text-blue-300;
+}
+
+.dark .track-panel-changes h4 {
+  @apply text-gray-400;
+}
+
+.dark .track-change-insertion {
+  @apply bg-green-900/30;
+}
+
+.dark .track-change-deletion {
+  @apply bg-red-900/30;
+}
+
+.dark .track-change-content {
+  @apply text-gray-300;
+}
+
+.dark .track-change-accept {
+  @apply text-green-400 hover:bg-green-900/50;
+}
+
+.dark .track-change-reject {
+  @apply text-red-400 hover:bg-red-900/50;
+}
+
+.dark .track-empty {
+  @apply text-gray-500;
+}
+
+.dark .track-more {
+  @apply text-gray-500;
+}
+
+/* Sidebar Container */
+.sidebar-container {
+  @apply flex-shrink-0 h-full flex flex-col;
 }

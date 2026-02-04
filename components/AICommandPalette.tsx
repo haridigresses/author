@@ -31,6 +31,7 @@ export default function AICommandPalette({ editor }: AICommandPaletteProps) {
   const [isOpen, setIsOpenInternal] = useState(false)
   const [focusedIndex, setFocusedIndex] = useState(0)
   const [filter, setFilter] = useState('')
+  const [imagePromptMode, setImagePromptMode] = useState(false)
 
   const setIsOpen = useCallback((open: boolean | ((prev: boolean) => boolean)) => {
     setIsOpenInternal(prev => {
@@ -173,8 +174,30 @@ export default function AICommandPalette({ editor }: AICommandPaletteProps) {
     }
   }, [savedSelection, savedDocContent, clearMessages, setSelectionContext, addMessage, setLoading, setIsOpen])
 
+  const handleGenerateImage = useCallback((prompt: string) => {
+    if (!prompt.trim()) return
+
+    // Use selected text as context if available, otherwise use the whole article
+    const context = savedSelection || savedDocContent
+
+    editor.commands.insertImageFromPrompt(prompt.trim(), context)
+    setIsOpen(false)
+    setImagePromptMode(false)
+  }, [editor, savedSelection, savedDocContent, setIsOpen])
+
+  const enterImagePromptMode = useCallback(() => {
+    setImagePromptMode(true)
+    setFilter('')
+    setFocusedIndex(0)
+  }, [])
+
   // Build command list based on mode
   const commands = useMemo((): Command[] => {
+    if (imagePromptMode) {
+      // In image prompt mode, show no commands - user types description and presses Enter
+      return []
+    }
+
     if (hasSelection) {
       return [
         // Tone
@@ -196,6 +219,8 @@ export default function AICommandPalette({ editor }: AICommandPaletteProps) {
         // Style
         { id: 'simplify', label: 'Simplify', group: 'Style', shortcut: '0', action: () => handleQuickEdit('edit', 'simplify', 'Style: Simplify') },
         { id: 'cadence', label: 'Improve cadence', group: 'Style', action: () => handleQuickEdit('edit', 'cadence', 'Style: Cadence') },
+        // Create
+        { id: 'generate-image', label: 'Generate image', group: 'Create', action: () => enterImagePromptMode() },
       ]
     } else {
       return [
@@ -220,9 +245,11 @@ export default function AICommandPalette({ editor }: AICommandPaletteProps) {
         { id: 'newcomer', label: 'Read as newcomer', group: 'Audience', action: () => handleExplore('Read this as someone new to the topic. Would they follow along?', 'Newcomer') },
         { id: 'critic', label: 'Read as critic', group: 'Audience', action: () => handleExplore('Read this as a hostile critic. What weaknesses would they find?', 'Critic') },
         { id: 'executive', label: 'Read as executive', group: 'Audience', action: () => handleExplore('Read this as a busy executive who skims. Would they get the point?', 'Executive') },
+        // Create
+        { id: 'generate-image', label: 'Generate image', group: 'Create', action: () => enterImagePromptMode() },
       ]
     }
-  }, [hasSelection, handleQuickEdit, handleExplore])
+  }, [hasSelection, imagePromptMode, handleQuickEdit, handleExplore, enterImagePromptMode])
 
   // Filter commands
   const filteredCommands = useMemo(() => {
@@ -254,6 +281,7 @@ export default function AICommandPalette({ editor }: AICommandPaletteProps) {
       setSavedDocContent(docContent)
       setFilter('')
       setFocusedIndex(0)
+      setImagePromptMode(false)
       setTimeout(() => inputRef.current?.focus(), 0)
     }
   }, [isOpen, getSelectedText, getDocContent])
@@ -299,6 +327,21 @@ export default function AICommandPalette({ editor }: AICommandPaletteProps) {
   // Keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
     const count = filteredCommands.length
+
+    // Handle image prompt mode specially
+    if (imagePromptMode) {
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        if (filter.trim()) {
+          handleGenerateImage(filter)
+        }
+      } else if (e.key === 'Escape') {
+        e.preventDefault()
+        setImagePromptMode(false)
+        setFilter('')
+      }
+      return
+    }
 
     switch (e.key) {
       case 'ArrowDown':
@@ -347,6 +390,14 @@ export default function AICommandPalette({ editor }: AICommandPaletteProps) {
       <div ref={paletteRef} className="ai-palette">
         {/* Header */}
         <div className="ai-palette-header">
+          {imagePromptMode && (
+            <button
+              className="ai-palette-back"
+              onClick={() => { setImagePromptMode(false); setFilter('') }}
+            >
+              ←
+            </button>
+          )}
           <input
             ref={inputRef}
             type="text"
@@ -355,12 +406,22 @@ export default function AICommandPalette({ editor }: AICommandPaletteProps) {
               setFilter(e.target.value)
               setFocusedIndex(0)
             }}
-            placeholder={hasSelection ? "Filter or ask about selection..." : "Filter or ask about your writing..."}
+            placeholder={
+              imagePromptMode
+                ? "Describe the image to generate..."
+                : hasSelection
+                  ? "Filter or ask about selection..."
+                  : "Filter or ask about your writing..."
+            }
             className="ai-palette-search"
             autoFocus
           />
           <div className="ai-palette-hint">
-            <kbd>↑↓</kbd> navigate <kbd>⏎</kbd> select <kbd>esc</kbd> close
+            {imagePromptMode ? (
+              <><kbd>⏎</kbd> generate <kbd>esc</kbd> back</>
+            ) : (
+              <><kbd>↑↓</kbd> navigate <kbd>⏎</kbd> select <kbd>esc</kbd> close</>
+            )}
           </div>
         </div>
 
@@ -390,7 +451,20 @@ export default function AICommandPalette({ editor }: AICommandPaletteProps) {
             </div>
           ))}
 
-          {filteredCommands.length === 0 && filter && (
+          {imagePromptMode && (
+            <div className="ai-palette-empty">
+              <span className="ai-palette-image-hint">
+                🖼 {hasSelection ? 'Using selected text as context' : 'Using article as context'}
+              </span>
+              {filter ? (
+                <span>Press Enter to generate: "{filter.slice(0, 50)}{filter.length > 50 ? '...' : ''}"</span>
+              ) : (
+                <span>Type a description for the image</span>
+              )}
+            </div>
+          )}
+
+          {!imagePromptMode && filteredCommands.length === 0 && filter && (
             <div className="ai-palette-empty">
               <span>Press Enter to ask: "{filter}"</span>
             </div>

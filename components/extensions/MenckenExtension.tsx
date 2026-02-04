@@ -2,9 +2,9 @@ import { Extension } from '@tiptap/core'
 import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { Decoration, DecorationSet } from '@tiptap/pm/view'
 
-const menckenKey = new PluginKey('mencken')
+export const menckenKey = new PluginKey('mencken')
 
-interface Issue {
+export interface MenckenIssue {
   type: 'long-sentence' | 'very-long-sentence' | 'passive' | 'adverb' | 'complex-word' | 'weak-transition'
   from: number
   to: number
@@ -33,8 +33,8 @@ const WEAK_TRANSITIONS = [
   'to be sure', 'well', 'with that in mind', 'you see',
 ]
 
-function analyzeText(text: string, offset: number): Issue[] {
-  const issues: Issue[] = []
+function analyzeText(text: string, offset: number): MenckenIssue[] {
+  const issues: MenckenIssue[] = []
   const sentences = text.match(/[^.!?]+[.!?]+/g) || [text]
   let pos = 0
 
@@ -120,7 +120,7 @@ export const MenckenExtension = Extension.create({
         key: menckenKey,
 
         state: {
-          init(): { issues: Issue[] } {
+          init(): { issues: MenckenIssue[] } {
             return { issues: [] }
           },
           apply(tr, value, _oldState, newState) {
@@ -133,7 +133,7 @@ export const MenckenExtension = Extension.create({
             }
 
             // Analyze all text nodes
-            const issues: Issue[] = []
+            const issues: MenckenIssue[] = []
             newState.doc.descendants((node, pos) => {
               if (node.isText && node.text) {
                 issues.push(...analyzeText(node.text, pos))
@@ -150,7 +150,7 @@ export const MenckenExtension = Extension.create({
               return DecorationSet.empty
             }
 
-            const decorations = pluginState.issues.map((issue: Issue) => {
+            const decorations = pluginState.issues.map((issue: MenckenIssue) => {
               return Decoration.inline(issue.from, issue.to, {
                 class: ISSUE_CLASSES[issue.type] || 'mencken-issue',
                 title: issue.message,

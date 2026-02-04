@@ -7,9 +7,11 @@ import DiffView from './DiffView'
 
 interface AISidebarProps {
   editor: Editor
+  tabAIEnabled: boolean
+  onToggleTabAI: (enabled: boolean) => void
 }
 
-export default function AISidebar({ editor }: AISidebarProps) {
+export default function AISidebar({ editor, tabAIEnabled, onToggleTabAI }: AISidebarProps) {
   const {
     loading,
     setLoading,
@@ -113,6 +115,21 @@ export default function AISidebar({ editor }: AISidebarProps) {
             </button>
           )}
         </div>
+      </div>
+
+      {/* Tab AI Toggle */}
+      <div className="ai-tab-toggle">
+        <label className="ai-tab-toggle-label">
+          <input
+            type="checkbox"
+            checked={tabAIEnabled}
+            onChange={(e) => onToggleTabAI(e.target.checked)}
+            className="ai-tab-toggle-input"
+          />
+          <span className="ai-tab-toggle-switch" />
+          <span className="ai-tab-toggle-text">Tab to autocomplete</span>
+        </label>
+        <span className="ai-tab-toggle-hint">Press Tab for AI suggestions as you type</span>
       </div>
 
       {/* Track changes toggle - show when we have insertable content */}

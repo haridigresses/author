@@ -1,16 +1,18 @@
 'use client'
 
 import { Editor } from '@tiptap/react'
-import { useCallback, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
+import LinkModal from './LinkModal'
 
 interface ToolbarProps {
   editor: Editor
-  onToggleVersions: () => void
   onExportMarkdown: () => void
   onToggleDark: () => void
   dark: boolean
   trackChangesEnabled: boolean
   onToggleTrackChanges: () => void
+  menckenEnabled: boolean
+  onToggleMencken: (enabled: boolean) => void
 }
 
 function Btn({
@@ -79,12 +81,53 @@ function Toggle({
   )
 }
 
-export default function Toolbar({ editor, onToggleVersions, onExportMarkdown, onToggleDark, dark, trackChangesEnabled, onToggleTrackChanges }: ToolbarProps) {
-  const [menckenEnabled, setMenckenEnabled] = useState(false)
-  const [tabCompleteEnabled, setTabCompleteEnabled] = useState(false)
-  const [imagePrompt, setImagePrompt] = useState('')
-  const [showImageInput, setShowImageInput] = useState(false)
+type EditorMode = 'track' | 'mencken' | null
+
+export default function Toolbar({ editor, onExportMarkdown, onToggleDark, dark, trackChangesEnabled, onToggleTrackChanges, menckenEnabled, onToggleMencken }: ToolbarProps) {
+  const [activeMode, setActiveMode] = useState<EditorMode>(null)
   const [showShortcuts, setShowShortcuts] = useState(false)
+  const [showLinkModal, setShowLinkModal] = useState(false)
+
+  // Sync activeMode with trackChangesEnabled from parent
+  useEffect(() => {
+    if (trackChangesEnabled && activeMode !== 'track') {
+      setActiveMode('track')
+    } else if (!trackChangesEnabled && activeMode === 'track') {
+      setActiveMode(null)
+    }
+  }, [trackChangesEnabled, activeMode])
+
+  // Sync activeMode with menckenEnabled from parent
+  useEffect(() => {
+    if (menckenEnabled && activeMode !== 'mencken') {
+      setActiveMode('mencken')
+    } else if (!menckenEnabled && activeMode === 'mencken') {
+      setActiveMode(null)
+    }
+  }, [menckenEnabled, activeMode])
+
+  // Handle mode changes - only one mode can be active at a time
+  const setMode = (mode: EditorMode) => {
+    const newMode = activeMode === mode ? null : mode
+
+    // Disable previous mode
+    if (activeMode === 'track' && newMode !== 'track') {
+      if (trackChangesEnabled) onToggleTrackChanges()
+    }
+    if (activeMode === 'mencken' && newMode !== 'mencken') {
+      onToggleMencken(false)
+    }
+
+    // Enable new mode
+    if (newMode === 'track' && !trackChangesEnabled) {
+      onToggleTrackChanges()
+    }
+    if (newMode === 'mencken') {
+      onToggleMencken(true)
+    }
+
+    setActiveMode(newMode)
+  }
 
   // Show shortcuts when Cmd/Ctrl is held
   useEffect(() => {
@@ -111,10 +154,21 @@ export default function Toolbar({ editor, onToggleVersions, onExportMarkdown, on
     }
   }, [])
 
-  const addLink = useCallback(() => {
-    const url = window.prompt('URL')
-    if (url) editor.chain().focus().setLink({ href: url }).run()
-  }, [editor])
+  const handleLinkSubmit = (url: string, text?: string) => {
+    const { from, to } = editor.state.selection
+    const hasSelection = from !== to
+
+    if (hasSelection) {
+      // Apply link to selection
+      editor.chain().focus().setLink({ href: url }).run()
+    } else if (text) {
+      // Insert new link with text
+      editor.chain().focus().insertContent(`<a href="${url}">${text}</a>`).run()
+    } else {
+      // Insert URL as both text and link
+      editor.chain().focus().insertContent(`<a href="${url}">${url}</a>`).run()
+    }
+  }
 
   return (
     <div className="toolbar">
@@ -152,7 +206,7 @@ export default function Toolbar({ editor, onToggleVersions, onExportMarkdown, on
       <Btn onClick={() => editor.chain().focus().toggleBlockquote().run()} active={editor.isActive('blockquote')} label="Quote" shortcut="⌘⇧B" showShortcut={showShortcuts}>"</Btn>
       <Btn onClick={() => editor.chain().focus().toggleCodeBlock().run()} active={editor.isActive('codeBlock')} label="Code block">{'{ }'}</Btn>
       <Btn onClick={() => editor.chain().focus().setHorizontalRule().run()} label="Divider">—</Btn>
-      <Btn onClick={addLink} active={editor.isActive('link')} label="Add link">🔗</Btn>
+      <Btn onClick={() => setShowLinkModal(true)} active={editor.isActive('link')} label="Add link">🔗</Btn>
 
       <Sep />
 
@@ -160,63 +214,34 @@ export default function Toolbar({ editor, onToggleVersions, onExportMarkdown, on
       <Btn onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()} label="Insert table">⊞</Btn>
       <Btn onClick={() => editor.chain().focus().toggleCallout().run()} label="Callout box">💬</Btn>
 
-      <div className="toolbar-image-group">
-        {showImageInput ? (
-          <form
-            className="toolbar-image-form"
-            onSubmit={(e) => {
-              e.preventDefault()
-              if (imagePrompt.trim()) {
-                editor.commands.insertImageFromPrompt(imagePrompt.trim())
-                setImagePrompt('')
-                setShowImageInput(false)
-              }
-            }}
-          >
-            <input
-              type="text"
-              value={imagePrompt}
-              onChange={(e) => setImagePrompt(e.target.value)}
-              placeholder="Describe the image..."
-              className="toolbar-image-input"
-              autoFocus
-              onKeyDown={(e) => { if (e.key === 'Escape') { setShowImageInput(false); setImagePrompt('') } }}
-            />
-            <button type="submit" className="toolbar-btn">Go</button>
-          </form>
-        ) : (
-          <Btn onClick={() => setShowImageInput(true)} label="Generate AI image">🖼</Btn>
-        )}
-      </div>
-
       <Sep />
 
       {/* Document actions */}
-      <Btn onClick={onToggleVersions} label="Version history">📜</Btn>
       <Btn onClick={onExportMarkdown} label="Download as Markdown file">⬇ .md</Btn>
 
       <div className="flex-1" />
 
-      {/* Toggles */}
+      {/* Mode toggles - mutually exclusive */}
       <Toggle
-        checked={trackChangesEnabled}
-        onChange={onToggleTrackChanges}
+        checked={activeMode === 'track'}
+        onChange={() => setMode('track')}
         label="Track"
         title="Track Changes - show edits as revisions"
       />
       <Toggle
-        checked={tabCompleteEnabled}
-        onChange={(checked) => { setTabCompleteEnabled(checked); editor.commands.toggleTabComplete(checked) }}
-        label="Tab AI"
-        title="Tab to autocomplete with AI (Haiku)"
-      />
-      <Toggle
-        checked={menckenEnabled}
-        onChange={(checked) => { setMenckenEnabled(checked); editor.commands.toggleMencken(checked) }}
+        checked={activeMode === 'mencken'}
+        onChange={() => setMode('mencken')}
         label="Mencken"
-        title="Mencken mode - critical writing feedback"
+        title="Writing analysis - opens panel with issues and AI suggestions"
       />
       <Btn onClick={onToggleDark} label={dark ? 'Light mode' : 'Dark mode'}>{dark ? '☀' : '☾'}</Btn>
+
+      <LinkModal
+        isOpen={showLinkModal}
+        onClose={() => setShowLinkModal(false)}
+        onSubmit={handleLinkSubmit}
+        hasSelection={editor.state.selection.from !== editor.state.selection.to}
+      />
     </div>
   )
 }

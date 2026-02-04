@@ -13,7 +13,16 @@ export async function POST(req: NextRequest) {
     body: JSON.stringify({
       model: 'claude-3-5-haiku-20241022',
       max_tokens: 100,
-      system: `You are an inline writing autocomplete engine. Given the context of a long-form document and the text immediately before the cursor, predict what the author would write next. Output ONLY the completion text — no quotes, no explanation, no preamble. Keep completions to 1-2 sentences max. Match the author's tone, style, and vocabulary exactly.`,
+      system: `You are a proactive writing autocomplete engine. Your job is to help writers maintain their flow by suggesting natural continuations. Given the context and text before the cursor, ALWAYS provide a helpful continuation. Output ONLY the completion text — no quotes, no explanation, no preamble.
+
+Guidelines:
+- Always suggest something. Even if unsure, offer a reasonable continuation.
+- Complete partial sentences naturally
+- Start new sentences when appropriate (after periods, at paragraph starts)
+- Match the author's tone and vocabulary
+- Be bold with suggestions — writers can always reject them
+- Keep completions to 1-3 sentences max
+- If at a paragraph end, suggest a transition to the next idea`,
       messages: [
         {
           role: 'user',

@@ -68,6 +68,18 @@ export const TabCompleteExtension = Extension.create({
         props: {
           decorations(state) {
             const pluginState: TabCompleteState = tabCompleteKey.getState(state)
+
+            // Show loading indicator when fetching completion
+            if (pluginState?.loading && pluginState.pos !== null) {
+              const loadingWidget = Decoration.widget(pluginState.pos, () => {
+                const span = document.createElement('span')
+                span.className = 'ghost-text ghost-text-loading'
+                span.textContent = '...'
+                return span
+              }, { side: 1 })
+              return DecorationSet.create(state.doc, [loadingWidget])
+            }
+
             if (!pluginState?.ghostText || pluginState.pos === null) {
               return DecorationSet.empty
             }
@@ -90,6 +102,7 @@ export const TabCompleteExtension = Extension.create({
             if (debounceTimer) clearTimeout(debounceTimer)
             if (abortController) abortController.abort()
 
+            // Reduced delay for more responsive suggestions
             debounceTimer = setTimeout(async () => {
               const { state } = editorView
               const { selection } = state
@@ -98,9 +111,9 @@ export const TabCompleteExtension = Extension.create({
               const pos = selection.from
               abortController = new AbortController()
 
-              // Set loading
+              // Set loading state with current position
               editorView.dispatch(
-                state.tr.setMeta(tabCompleteKey, { ghostText: null, pos: null, loading: true })
+                state.tr.setMeta(tabCompleteKey, { ghostText: null, pos, loading: true })
               )
 
               try {
@@ -119,7 +132,7 @@ export const TabCompleteExtension = Extension.create({
               } catch {
                 // Aborted or failed — ignore
               }
-            }, 800)
+            }, 400)
           }
 
           return {

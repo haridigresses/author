@@ -1,7 +1,7 @@
 'use client'
 
 import { Extension, Mark as TiptapMark } from '@tiptap/core'
-import { Plugin, PluginKey } from '@tiptap/pm/state'
+import { Plugin, PluginKey, TextSelection } from '@tiptap/pm/state'
 
 // Insertion mark - green highlight for new text
 export const InsertionMark = TiptapMark.create({
@@ -157,6 +157,10 @@ export const TrackChanges = Extension.create<TrackChangesOptions>({
           // Skip if this is our own transaction (has meta)
           if (transactions.some(tr => tr.getMeta('trackChangesProcessed'))) return null
 
+          // Skip undo/redo transactions - these should not be tracked as new changes
+          // The history plugin sets 'history$' meta on undo/redo operations
+          if (transactions.some(tr => tr.getMeta('history$'))) return null
+
           const tr = newState.tr
           tr.setMeta('trackChangesProcessed', true)
           let modified = false
@@ -204,20 +208,39 @@ export const TrackChanges = Extension.create<TrackChangesOptions>({
                 // Handle deletions - re-insert deleted text with deletion mark
                 if (deletedLength > 0) {
                   try {
-                    // Get the deleted content from old doc
-                    const deletedSlice = oldDoc.slice(oldStart, oldEnd)
-                    const deletedText = deletedSlice.content.textBetween(0, deletedSlice.content.size)
+                    // Check if the deleted content has existing marks
+                    // - If deletion mark: allow true deletion (user removing tracked deletions)
+                    // - If insertion mark: allow true deletion (removing new text doesn't need tracking)
+                    let skipReinsert = false
+                    oldDoc.nodesBetween(oldStart, oldEnd, (node) => {
+                      if (node.marks?.some(m =>
+                        m.type.name === 'deletion' || m.type.name === 'insertion'
+                      )) {
+                        skipReinsert = true
+                      }
+                    })
 
-                    if (deletedText) {
-                      // Find where to insert (at the position where deletion occurred)
-                      const insertPos = tr.mapping.map(newStart)
+                    // Only re-insert as deletion if text was unmarked (original content)
+                    if (!skipReinsert) {
+                      const deletedSlice = oldDoc.slice(oldStart, oldEnd)
+                      const deletedText = deletedSlice.content.textBetween(0, deletedSlice.content.size)
 
-                      // Create text node with deletion mark
-                      const deletionMark = newState.schema.marks.deletion.create()
-                      const textNode = newState.schema.text(deletedText, [deletionMark])
+                      if (deletedText) {
+                        // Find where to insert (at the position where deletion occurred)
+                        const insertPos = tr.mapping.map(newStart)
 
-                      tr.insert(insertPos, textNode)
-                      modified = true
+                        // Create text node with deletion mark
+                        const deletionMark = newState.schema.marks.deletion.create()
+                        const textNode = newState.schema.text(deletedText, [deletionMark])
+
+                        tr.insert(insertPos, textNode)
+
+                        // Set cursor position to BEFORE the inserted deletion text
+                        // This allows subsequent backspaces to delete preceding characters
+                        tr.setSelection(TextSelection.create(tr.doc, insertPos))
+
+                        modified = true
+                      }
                     }
                   } catch (e) {
                     // Failed to restore deleted text, skip
