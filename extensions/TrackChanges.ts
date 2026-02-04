@@ -208,39 +208,59 @@ export const TrackChanges = Extension.create<TrackChangesOptions>({
                 // Handle deletions - re-insert deleted text with deletion mark
                 if (deletedLength > 0) {
                   try {
-                    // Check if the deleted content has existing marks
-                    // - If deletion mark: allow true deletion (user removing tracked deletions)
-                    // - If insertion mark: allow true deletion (removing new text doesn't need tracking)
-                    let skipReinsert = false
-                    oldDoc.nodesBetween(oldStart, oldEnd, (node) => {
-                      if (node.marks?.some(m =>
-                        m.type.name === 'deletion' || m.type.name === 'insertion'
-                      )) {
-                        skipReinsert = true
+                    // Collect only unmarked (original) text segments that need tracking
+                    const unmarkedSegments: string[] = []
+                    let currentSegment = ''
+
+                    oldDoc.nodesBetween(oldStart, oldEnd, (node, pos) => {
+                      if (node.isText) {
+                        const hasTrackMark = node.marks?.some(m =>
+                          m.type.name === 'deletion' || m.type.name === 'insertion'
+                        )
+
+                        if (!hasTrackMark) {
+                          // Calculate which part of this text node is within our range
+                          const nodeStart = pos
+                          const nodeEnd = pos + node.nodeSize
+                          const overlapStart = Math.max(nodeStart, oldStart)
+                          const overlapEnd = Math.min(nodeEnd, oldEnd)
+
+                          if (overlapStart < overlapEnd) {
+                            const textStart = overlapStart - nodeStart
+                            const textEnd = overlapEnd - nodeStart
+                            currentSegment += node.text?.slice(textStart, textEnd) || ''
+                          }
+                        } else if (currentSegment) {
+                          // Hit marked text, save current segment and start fresh
+                          unmarkedSegments.push(currentSegment)
+                          currentSegment = ''
+                        }
                       }
                     })
 
-                    // Only re-insert as deletion if text was unmarked (original content)
-                    if (!skipReinsert) {
-                      const deletedSlice = oldDoc.slice(oldStart, oldEnd)
-                      const deletedText = deletedSlice.content.textBetween(0, deletedSlice.content.size)
+                    // Don't forget the last segment
+                    if (currentSegment) {
+                      unmarkedSegments.push(currentSegment)
+                    }
 
-                      if (deletedText) {
-                        // Find where to insert (at the position where deletion occurred)
-                        const insertPos = tr.mapping.map(newStart)
+                    // Re-insert all unmarked segments as deletions
+                    const deletedText = unmarkedSegments.join('')
 
-                        // Create text node with deletion mark
-                        const deletionMark = newState.schema.marks.deletion.create()
-                        const textNode = newState.schema.text(deletedText, [deletionMark])
+                    if (deletedText) {
+                      // Find where to insert (at the position where deletion occurred)
+                      const insertPos = tr.mapping.map(newStart)
 
-                        tr.insert(insertPos, textNode)
+                      // Create text node with deletion mark
+                      const deletionMark = newState.schema.marks.deletion.create()
+                      const textNode = newState.schema.text(deletedText, [deletionMark])
 
-                        // Set cursor position to BEFORE the inserted deletion text
-                        // This allows subsequent backspaces to delete preceding characters
-                        tr.setSelection(TextSelection.create(tr.doc, insertPos))
+                      tr.insert(insertPos, textNode)
 
-                        modified = true
-                      }
+                      // Set cursor position to BEFORE the inserted deletion text
+                      // This allows subsequent backspaces to delete preceding characters
+                      tr.setSelection(TextSelection.create(tr.doc, insertPos))
+
+                      modified = true
                     }
                   } catch (e) {
                     // Failed to restore deleted text, skip

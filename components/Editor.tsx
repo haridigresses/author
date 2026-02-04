@@ -110,6 +110,163 @@ export default function Editor() {
       attributes: {
         class: 'ProseMirror',
       },
+      // Fix pasted HTML to keep links inline instead of breaking them into separate paragraphs
+      transformPastedHTML(html) {
+        // Create a temporary DOM to process the HTML
+        const doc = new DOMParser().parseFromString(html, 'text/html')
+
+        // Helper to check if a paragraph is empty
+        const isEmpty = (el: HTMLElement): boolean => {
+          return !el.textContent?.trim()
+        }
+
+        // Helper to check if a paragraph contains only a link
+        const isLinkOnly = (el: HTMLElement): boolean => {
+          if (el.tagName !== 'P') return false
+          const children = Array.from(el.childNodes)
+          const nonEmptyChildren = children.filter(
+            (child) => !(child.nodeType === Node.TEXT_NODE && !child.textContent?.trim())
+          )
+          return nonEmptyChildren.length === 1 && nonEmptyChildren[0].nodeName === 'A'
+        }
+
+        // Helper to check if text starts with continuation markers
+        const startsWithContinuation = (text: string): boolean => {
+          return /^[,.\-;:)\]'"'"\s]/.test(text) || /^[a-z]/.test(text)
+        }
+
+        // Helper to check if text ends without sentence termination (incomplete sentence)
+        const endsIncomplete = (text: string): boolean => {
+          const trimmed = text.trim()
+          if (!trimmed) return false
+          // Ends with a word (no sentence-ending punctuation)
+          return !/[.!?]$/.test(trimmed)
+        }
+
+        // Helper to check if a paragraph starts with a link
+        const startsWithLink = (el: HTMLElement): boolean => {
+          const firstChild = el.firstChild
+          if (!firstChild) return false
+          if (firstChild.nodeName === 'A') return true
+          // Check if first non-whitespace child is a link
+          for (const child of Array.from(el.childNodes)) {
+            if (child.nodeType === Node.TEXT_NODE && !child.textContent?.trim()) continue
+            return child.nodeName === 'A'
+          }
+          return false
+        }
+
+        // Helper to check if parent is a valid merge context (body or list item)
+        const isValidMergeContext = (parent: Element | null): boolean => {
+          if (!parent) return false
+          return parent === doc.body || parent.tagName === 'LI'
+        }
+
+        // FIRST: Unwrap div/span elements that contain only a link
+        // This is critical for Twitter which wraps links in <div class="css-175oi2r">
+        // Must happen before any paragraph processing
+        let unwrapChanged = true
+        while (unwrapChanged) {
+          unwrapChanged = false
+          const wrappers = doc.querySelectorAll('div, span')
+          for (const wrapper of Array.from(wrappers)) {
+            // Skip text-containing spans (Twitter uses span[data-text="true"])
+            if (wrapper.tagName === 'SPAN' && wrapper.hasAttribute('data-text')) continue
+            // Skip if parent is body (top-level blocks)
+            if (wrapper.parentElement === doc.body) continue
+
+            const children = Array.from(wrapper.childNodes)
+            const nonEmptyChildren = children.filter(
+              (node) => !(node.nodeType === Node.TEXT_NODE && !node.textContent?.trim())
+            )
+
+            if (nonEmptyChildren.length === 1) {
+              const child = nonEmptyChildren[0]
+              if (child.nodeName === 'A') {
+                wrapper.replaceWith(child)
+                unwrapChanged = true
+                break
+              }
+            }
+          }
+        }
+
+        // Second: remove empty paragraphs/divs that might be separating content
+        const emptyParagraphs = Array.from(doc.body.querySelectorAll('p')).filter(isEmpty)
+        emptyParagraphs.forEach((p) => p.remove())
+
+        // Second pass: merge link-only paragraphs FORWARD into continuation text
+        let changed = true
+        while (changed) {
+          changed = false
+          const paragraphs = Array.from(doc.body.querySelectorAll('p'))
+
+          for (const p of paragraphs) {
+            if (!isLinkOnly(p)) continue
+            if (!isValidMergeContext(p.parentElement)) continue
+
+            // Find next paragraph sibling
+            let next = p.nextElementSibling
+            while (next && next.tagName !== 'P') {
+              next = next.nextElementSibling
+            }
+
+            // If next paragraph starts with continuation text, merge forward
+            if (next && next.tagName === 'P' && startsWithContinuation(next.textContent || '')) {
+              // Prepend link to next paragraph
+              const link = Array.from(p.childNodes).find((child) => child.nodeName === 'A')
+              if (link) {
+                next.insertBefore(document.createTextNode(' '), next.firstChild)
+                next.insertBefore(link, next.firstChild)
+              }
+              p.remove()
+              changed = true
+              break
+            }
+          }
+        }
+
+        // Third pass: merge paragraphs BACKWARD if previous ends incomplete
+        // This handles: "...text like" + "[Link], more text" → "...text like [Link], more text"
+        changed = true
+        while (changed) {
+          changed = false
+          const paragraphs = Array.from(doc.body.querySelectorAll('p'))
+
+          for (const p of paragraphs) {
+            if (isEmpty(p)) continue
+            if (!isValidMergeContext(p.parentElement)) continue
+
+            // Check if this paragraph should merge backward:
+            // - starts with continuation punctuation, OR
+            // - starts with a link (result of forward merge that should continue backward)
+            const shouldMergeBack =
+              startsWithContinuation(p.textContent || '') || startsWithLink(p)
+
+            if (!shouldMergeBack) continue
+
+            // Find previous paragraph sibling
+            let prev = p.previousElementSibling
+            while (prev && prev.tagName !== 'P') {
+              prev = prev.previousElementSibling
+            }
+
+            // Only merge if previous paragraph ends with incomplete sentence
+            if (prev && prev.tagName === 'P' && endsIncomplete(prev.textContent || '')) {
+              // Merge this paragraph into the previous one
+              prev.appendChild(document.createTextNode(' '))
+              Array.from(p.childNodes).forEach((child) => {
+                prev!.appendChild(child)
+              })
+              p.remove()
+              changed = true
+              break
+            }
+          }
+        }
+
+        return doc.body.innerHTML
+      },
       handlePaste(view, event) {
         const items = event.clipboardData?.items
         if (!items) return false
