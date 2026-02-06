@@ -38,15 +38,21 @@ import { AIProvider } from './AIContext'
 import Sidebar from './Sidebar'
 import Scratchpad from './Scratchpad'
 import AICommandPalette from './AICommandPalette'
-import { useAutosave } from './hooks/useAutosave'
+import { useConvexDocument } from './hooks/useConvexDocument'
 import { useDarkMode } from './hooks/useDarkMode'
 import { useVersionHistory } from './hooks/useVersionHistory'
 import { exportMarkdown } from './hooks/useExportMarkdown'
 import { useEffect, useState } from 'react'
+import { Id } from '@/convex/_generated/dataModel'
 
 type SidebarMode = 'ai' | 'mencken' | 'track'
 
-export default function Editor() {
+interface EditorProps {
+  documentId: Id<"documents">
+  onTitleChange?: (title: string) => void
+}
+
+export default function Editor({ documentId, onTitleChange }: EditorProps) {
   const [shortcutsState, setShortcutsState] = useState<HighlightShortcutsState | null>(null)
   const [trackChangesEnabled, setTrackChangesEnabled] = useState(false)
   const [menckenEnabled, setMenckenEnabled] = useState(false)
@@ -225,7 +231,7 @@ export default function Editor() {
               // Prepend link to next paragraph
               const link = Array.from(p.childNodes).find((child) => child.nodeName === 'A')
               if (link) {
-                next.insertBefore(document.createTextNode(' '), next.firstChild)
+                next.insertBefore(doc.createTextNode(' '), next.firstChild)
                 next.insertBefore(link, next.firstChild)
               }
               p.remove()
@@ -263,7 +269,7 @@ export default function Editor() {
             // Only merge if previous paragraph ends with incomplete sentence
             if (prev && prev.tagName === 'P' && endsIncomplete(prev.textContent || '')) {
               // Merge this paragraph into the previous one
-              prev.appendChild(document.createTextNode(' '))
+              prev.appendChild(doc.createTextNode(' '))
               Array.from(p.childNodes).forEach((child) => {
                 prev!.appendChild(child)
               })
@@ -330,8 +336,31 @@ export default function Editor() {
     },
   })
 
-  useAutosave(editor)
+  const { document, isSaving } = useConvexDocument(editor, documentId)
   const { versions, restore, snapshotNow } = useVersionHistory(editor)
+
+  // Extract title from first H1 and sync
+  useEffect(() => {
+    if (!editor || !onTitleChange) return
+
+    const extractTitle = () => {
+      const json = editor.getJSON()
+      const firstHeading = json.content?.find(
+        (node) =>
+          node.type === 'heading' && node.attrs?.level === 1
+      )
+      if (firstHeading && 'content' in firstHeading) {
+        const textContent = (firstHeading.content as { text?: string }[])
+          ?.map((c) => c.text || '')
+          .join('') || 'Untitled'
+        onTitleChange(textContent)
+      }
+    }
+
+    editor.on('update', extractTitle)
+    extractTitle() // Initial extraction
+    return () => { editor.off('update', extractTitle) }
+  }, [editor, onTitleChange])
 
   useEffect(() => {
     if (!editor) return
@@ -389,7 +418,7 @@ export default function Editor() {
           <div className="editor-scroll">
             <EditorContent editor={editor} />
           </div>
-          <StatusBar editor={editor} />
+          <StatusBar editor={editor} isSaving={isSaving} />
           {shortcutsState && (
             <>
               <CommandPalette editor={editor} state={shortcutsState} />

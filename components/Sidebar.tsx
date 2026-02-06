@@ -4,6 +4,7 @@ import { Editor } from '@tiptap/react'
 import AISidebar from './AISidebar'
 import MenckenPanel from './MenckenPanel'
 import TrackChangesPanel from './TrackChangesPanel'
+import { Version } from './hooks/useVersionHistory'
 
 type SidebarMode = 'ai' | 'mencken' | 'track'
 
@@ -14,8 +15,8 @@ interface SidebarProps {
   tabAIEnabled: boolean
   onToggleTabAI: (enabled: boolean) => void
   // Track changes props
-  versions: Array<{ id: string; timestamp: Date; content: string }>
-  onRestore: (id: string) => void
+  versions: Version[]
+  onRestore: (version: Version) => void
   onSnapshot: () => void
   // Mencken props
   onCloseMencken: () => void
@@ -52,7 +53,10 @@ export default function Sidebar({
         <TrackChangesPanel
           editor={editor}
           versions={versions}
-          onRestore={onRestore}
+          onRestore={(id) => {
+            const version = versions.find(v => v.id === id)
+            if (version) onRestore(version)
+          }}
           onSnapshot={onSnapshot}
         />
       )}

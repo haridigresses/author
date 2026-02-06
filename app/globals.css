@@ -375,50 +375,31 @@ body {
   @apply text-gray-400 text-xs;
 }
 
-/* Overflow menu trigger */
-.toolbar-overflow-btn {
-  @apply px-2 py-1 rounded text-xs font-bold text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors tracking-widest;
+/* Toolbar container */
+.toolbar-container {
+  @apply flex-shrink-0 z-10 bg-white border-b border-gray-200;
 }
 
-.toolbar-overflow-btn-open {
-  @apply bg-gray-100 text-gray-600;
+/* Toolbar expand/collapse toggle */
+.toolbar-expand-btn {
+  @apply px-2 py-1 rounded text-sm text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors;
 }
 
-/* Overflow dropdown panel */
-.toolbar-overflow-menu {
-  @apply absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[220px] z-20;
+/* Second toolbar row */
+.toolbar-second-row {
+  @apply px-4 py-2 flex flex-wrap items-center gap-1.5 text-sm border-t border-gray-100 bg-gray-50;
+  animation: slideDown 0.2s ease-out;
 }
 
-.toolbar-overflow-group {
-  @apply py-1;
-}
-
-.toolbar-overflow-group + .toolbar-overflow-group {
-  @apply border-t border-gray-100;
-}
-
-.toolbar-overflow-group-label {
-  @apply px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-gray-400;
-}
-
-.toolbar-overflow-item {
-  @apply flex items-center gap-2 w-full px-3 py-1.5 text-sm text-left text-gray-700 hover:bg-gray-50 transition-colors;
-}
-
-.toolbar-overflow-item-active {
-  @apply text-blue-600 bg-blue-50;
-}
-
-.toolbar-overflow-icon {
-  @apply w-6 text-center text-xs font-medium flex-shrink-0;
-}
-
-.toolbar-overflow-label {
-  @apply flex-1;
-}
-
-.toolbar-overflow-hint {
-  @apply text-xs text-gray-400 ml-auto pl-3 font-mono;
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Mode buttons (Track / Mencken) */
@@ -438,37 +419,17 @@ body {
   @apply leading-none;
 }
 
-/* Dark mode: Overflow menu */
-.dark .toolbar-overflow-btn {
+/* Dark mode: Toolbar container and second row */
+.dark .toolbar-container {
+  @apply bg-gray-800 border-gray-700;
+}
+
+.dark .toolbar-expand-btn {
   @apply text-gray-500 hover:text-gray-300 hover:bg-gray-700;
 }
 
-.dark .toolbar-overflow-btn-open {
-  @apply bg-gray-700 text-gray-300;
-}
-
-.dark .toolbar-overflow-menu {
-  @apply bg-gray-800 border-gray-700 shadow-xl;
-}
-
-.dark .toolbar-overflow-group + .toolbar-overflow-group {
-  @apply border-gray-700;
-}
-
-.dark .toolbar-overflow-group-label {
-  @apply text-gray-500;
-}
-
-.dark .toolbar-overflow-item {
-  @apply text-gray-300 hover:bg-gray-700;
-}
-
-.dark .toolbar-overflow-item-active {
-  @apply text-blue-400 bg-blue-900/30;
-}
-
-.dark .toolbar-overflow-hint {
-  @apply text-gray-500;
+.dark .toolbar-second-row {
+  @apply border-gray-700 bg-gray-900;
 }
 
 /* Dark mode: Mode buttons */
@@ -2349,4 +2310,187 @@ body {
 /* Sidebar Container */
 .sidebar-container {
   @apply flex-shrink-0 h-full flex flex-col;
+}
+
+/* Document App Layout */
+.document-app {
+  @apply flex h-screen w-screen;
+}
+
+.document-app-loading {
+  @apply flex items-center justify-center h-screen w-screen;
+}
+
+.loading-spinner {
+  @apply w-6 h-6 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin;
+}
+
+.document-sidebar {
+  @apply flex-shrink-0 w-56 h-full bg-gray-100 border-r border-gray-200 flex flex-col relative;
+  transition: width 0.2s ease;
+}
+
+.sidebar-collapsed .document-sidebar {
+  @apply w-10;
+}
+
+.sidebar-toggle {
+  @apply absolute top-3 right-2 w-6 h-6 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded transition-colors z-10;
+}
+
+.sidebar-collapsed .sidebar-toggle {
+  @apply right-2;
+}
+
+.document-editor-container {
+  @apply flex-1 min-w-0 h-full overflow-hidden;
+}
+
+/* Document List */
+.document-list {
+  @apply flex flex-col h-full pt-10;
+}
+
+.document-list-header {
+  @apply flex items-center justify-between px-3 py-2 text-xs font-medium text-gray-500 uppercase tracking-wide;
+}
+
+.document-new-btn {
+  @apply w-6 h-6 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded transition-colors;
+}
+
+.document-list-items {
+  @apply flex-1 overflow-y-auto px-2;
+}
+
+.document-list-empty {
+  @apply flex flex-col items-center justify-center py-8 text-center;
+}
+
+.document-list-empty p {
+  @apply text-sm text-gray-500 mb-3;
+}
+
+.document-create-btn {
+  @apply text-sm text-blue-600 hover:text-blue-700 font-medium;
+}
+
+.document-item {
+  @apply flex items-center justify-between px-3 py-2 rounded-lg mb-1 cursor-pointer hover:bg-gray-200 transition-colors;
+}
+
+.document-item.active {
+  @apply bg-white shadow-sm;
+}
+
+.document-item-content {
+  @apply flex flex-col min-w-0 flex-1;
+}
+
+.document-title {
+  @apply text-sm font-medium truncate;
+}
+
+.document-date {
+  @apply text-xs text-gray-500;
+}
+
+.document-delete-btn {
+  @apply w-6 h-6 flex items-center justify-center text-gray-400 hover:text-red-500 rounded opacity-0 group-hover:opacity-100 transition-all;
+}
+
+/* Status save indicator */
+.status-save {
+  @apply transition-colors;
+}
+
+.status-save.saving {
+  @apply text-amber-600;
+}
+
+.status-save.saved {
+  @apply text-green-600;
+}
+
+/* Dark mode */
+.dark .document-sidebar {
+  @apply bg-gray-900 border-gray-800;
+}
+
+.dark .sidebar-toggle {
+  @apply text-gray-400 hover:text-gray-200 hover:bg-gray-800;
+}
+
+.dark .document-list-header {
+  @apply text-gray-400;
+}
+
+.dark .document-new-btn {
+  @apply text-gray-400 hover:text-gray-200 hover:bg-gray-800;
+}
+
+.dark .document-item {
+  @apply hover:bg-gray-800;
+}
+
+.dark .document-item.active {
+  @apply bg-gray-800;
+}
+
+.dark .document-title {
+  @apply text-gray-200;
+}
+
+.dark .document-date {
+  @apply text-gray-500;
+}
+
+.dark .document-delete-btn {
+  @apply text-gray-500 hover:text-red-400;
+}
+
+.dark .document-list-empty p {
+  @apply text-gray-500;
+}
+
+.dark .document-create-btn {
+  @apply text-blue-400 hover:text-blue-300;
+}
+
+.dark .loading-spinner {
+  @apply border-gray-700 border-t-gray-400;
+}
+
+.dark .status-save.saving {
+  @apply text-amber-500;
+}
+
+.dark .status-save.saved {
+  @apply text-green-500;
+}
+
+/* User menu */
+.user-menu {
+  @apply absolute top-full right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[160px] z-20;
+}
+
+.user-menu-status {
+  @apply px-3 py-1.5 text-xs text-gray-400 border-b border-gray-100;
+}
+
+.user-menu-item {
+  @apply flex items-center w-full px-3 py-2 text-sm text-left text-gray-700 hover:bg-gray-50 transition-colors;
+}
+
+/* Dark mode: User menu */
+.dark .user-menu {
+  @apply bg-gray-800 border-gray-700;
+}
+
+.dark .user-menu-status {
+  @apply text-gray-500 border-gray-700;
+}
+
+.dark .user-menu-item {
+  @apply text-gray-300 hover:bg-gray-700;
 }

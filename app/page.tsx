@@ -1,9 +1,9 @@
-import Editor from '@/components/Editor'
+import DocumentApp from '@/components/DocumentApp'
 
 export default function Home() {
   return (
     <main className="min-h-screen">
-      <Editor />
+      <DocumentApp />
     </main>
   )
 }

@@ -5,13 +5,14 @@ import { useEffect, useState } from 'react'
 
 interface StatusBarProps {
   editor: Editor
+  isSaving?: boolean
 }
 
 function countWords(text: string): number {
   return text.trim().split(/\s+/).filter(Boolean).length
 }
 
-export default function StatusBar({ editor }: StatusBarProps) {
+export default function StatusBar({ editor, isSaving }: StatusBarProps) {
   const [stats, setStats] = useState({ words: 0, chars: 0, readingTime: '' })
 
   useEffect(() => {
@@ -38,6 +39,14 @@ export default function StatusBar({ editor }: StatusBarProps) {
       <span>{stats.chars.toLocaleString()} chars</span>
       <span className="status-sep">·</span>
       <span>{stats.readingTime}</span>
+      {isSaving !== undefined && (
+        <>
+          <span className="status-sep">·</span>
+          <span className={`status-save ${isSaving ? 'saving' : 'saved'}`}>
+            {isSaving ? 'Saving...' : 'Saved'}
+          </span>
+        </>
+      )}
     </div>
   )
 }
