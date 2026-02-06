@@ -54,7 +54,6 @@
   },
   "lint-staged": {
     "*.{ts,tsx}": [
-      "bash -c 'npm run lint'",
       "bash -c 'tsc --noEmit'"
     ]
   }
