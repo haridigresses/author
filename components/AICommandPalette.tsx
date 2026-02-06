@@ -1,5 +1,7 @@
 'use client'
 
+/// <reference path="../types/tiptap.d.ts" />
+
 import { Editor } from '@tiptap/react'
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { createPortal } from 'react-dom'
@@ -180,13 +182,11 @@ export default function AICommandPalette({ editor }: AICommandPaletteProps) {
   const handleGenerateImage = useCallback((prompt: string) => {
     if (!prompt.trim()) return
 
-    // Use selected text as context if available, otherwise use the whole article
-    const context = savedSelection || savedDocContent
-
-    editor.commands.insertImageFromPrompt(prompt.trim(), context)
+    // Note: Context is automatically pulled from document by the extension
+    editor.commands.insertImageFromPrompt(prompt.trim())
     setIsOpen(false)
     setImagePromptMode(false)
-  }, [editor, savedSelection, savedDocContent, setIsOpen])
+  }, [editor, setIsOpen])
 
   const enterImagePromptMode = useCallback(() => {
     setImagePromptMode(true)
