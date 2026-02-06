@@ -135,11 +135,3 @@ export const ImageGenerationExtension = Node.create({
     }
   },
 })
-
-declare module '@tiptap/core' {
-  interface Commands<ReturnType> {
-    generatedImage: {
-      insertImageFromPrompt: (prompt: string, context?: string) => ReturnType
-    }
-  }
-}

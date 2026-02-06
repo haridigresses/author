@@ -17,5 +17,8 @@ declare module '@tiptap/core' {
     callout: {
       toggleCallout: () => ReturnType
     }
+    generatedImage: {
+      insertImageFromPrompt: (prompt: string, context?: string) => ReturnType
+    }
   }
 }
