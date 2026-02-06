@@ -12,14 +12,23 @@ const LAST_DOC_KEY = "author-last-document"
 export default function DocumentApp() {
   const [documentId, setDocumentId] = useState<Id<"documents"> | null>(null)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [userId, setUserId] = useState<Id<"users"> | null>(null)
 
-  const documents = useQuery(api.documents.list)
+  // Load userId from localStorage
+  useEffect(() => {
+    const storedUserId = localStorage.getItem('userId')
+    if (storedUserId) {
+      setUserId(storedUserId as Id<"users">)
+    }
+  }, [])
+
+  const documents = useQuery(api.documents.list, userId ? { userId } : "skip")
   const createDocument = useMutation(api.documents.create)
   const updateDocument = useMutation(api.documents.update)
 
   // On mount, restore last document or create one
   useEffect(() => {
-    if (documents === undefined) return // Still loading
+    if (!userId || documents === undefined) return // Still loading or no user
 
     const lastDocId = localStorage.getItem(LAST_DOC_KEY)
 
@@ -29,11 +38,11 @@ export default function DocumentApp() {
       setDocumentId(documents[0]._id)
     } else {
       // No documents - create one
-      createDocument({ title: "Untitled" }).then((id) => {
+      createDocument({ title: "Untitled", userId }).then((id) => {
         setDocumentId(id)
       })
     }
-  }, [documents, createDocument])
+  }, [documents, createDocument, userId])
 
   // Persist selected document
   useEffect(() => {
@@ -50,6 +59,18 @@ export default function DocumentApp() {
 
   const handleSelectDocument = (id: Id<"documents">) => {
     setDocumentId(id)
+  }
+
+  // Show sign-in prompt if no user
+  if (!userId) {
+    return (
+      <div className="document-app-loading">
+        <div className="sign-in-prompt">
+          <h2>Welcome to Author</h2>
+          <p>Please sign in using the 👤 button in the top right to get started.</p>
+        </div>
+      </div>
+    )
   }
 
   // Show loading while we determine initial document
@@ -77,10 +98,11 @@ export default function DocumentApp() {
             )}
           </svg>
         </button>
-        {!sidebarCollapsed && (
+        {!sidebarCollapsed && userId && (
           <DocumentList
             currentDocumentId={documentId}
             onSelect={handleSelectDocument}
+            userId={userId}
           />
         )}
       </div>

@@ -2494,3 +2494,33 @@ body {
 .dark .user-menu-item {
   @apply text-gray-300 hover:bg-gray-700;
 }
+
+/* Editor lock warning */
+.editor-lock-warning {
+  @apply bg-yellow-50 border-b border-yellow-200 px-4 py-3 text-sm text-yellow-900 text-center;
+}
+
+.dark .editor-lock-warning {
+  @apply bg-yellow-900/20 border-yellow-800/30 text-yellow-200;
+}
+
+/* Sign-in prompt */
+.sign-in-prompt {
+  @apply text-center px-8 py-16;
+}
+
+.sign-in-prompt h2 {
+  @apply text-2xl font-bold mb-2 text-gray-900;
+}
+
+.sign-in-prompt p {
+  @apply text-gray-600;
+}
+
+.dark .sign-in-prompt h2 {
+  @apply text-gray-100;
+}
+
+.dark .sign-in-prompt p {
+  @apply text-gray-400;
+}

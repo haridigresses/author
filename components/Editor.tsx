@@ -336,7 +336,7 @@ export default function Editor({ documentId, onTitleChange }: EditorProps) {
     },
   })
 
-  const { document, isSaving } = useConvexDocument(editor, documentId)
+  const { document, isSaving, hasLock, lockedByOther } = useConvexDocument(editor, documentId)
   const { versions, restore, snapshotNow } = useVersionHistory(editor)
 
   // Extract title from first H1 and sync
@@ -415,6 +415,11 @@ export default function Editor({ documentId, onTitleChange }: EditorProps) {
             scratchpadOpen={scratchpadOpen}
             onToggleScratchpad={() => setScratchpadOpen(prev => !prev)}
           />
+          {lockedByOther && (
+            <div className="editor-lock-warning">
+              ⚠️ This document is being edited by {lockedByOther}. Your changes will not be saved.
+            </div>
+          )}
           <div className="editor-scroll">
             <EditorContent editor={editor} />
           </div>
