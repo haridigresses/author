@@ -18,7 +18,7 @@ import Superscript from '@tiptap/extension-superscript'
 import Subscript from '@tiptap/extension-subscript'
 import Image from '@tiptap/extension-image'
 import { CalloutExtension } from './extensions/CalloutExtension'
-import { ImageGenerationExtension } from './extensions/ImageGenerationExtension'
+import { TldrawDiagramExtension } from './extensions/TldrawDiagramExtension'
 import { TabCompleteExtension } from './extensions/TabCompleteExtension'
 import { MenckenExtension } from './extensions/MenckenExtension'
 import {
@@ -107,7 +107,7 @@ export default function Editor({ documentId, onTitleChange }: EditorProps) {
       Subscript,
       Image.configure({ inline: true, allowBase64: true }),
       CalloutExtension,
-      ImageGenerationExtension,
+      TldrawDiagramExtension,
       TabCompleteExtension,
       MenckenExtension,
       HighlightShortcutsExtension,

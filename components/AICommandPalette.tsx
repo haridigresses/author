@@ -34,7 +34,7 @@ export default function AICommandPalette({ editor }: AICommandPaletteProps) {
   const [isOpen, setIsOpenInternal] = useState(false)
   const [focusedIndex, setFocusedIndex] = useState(0)
   const [filter, setFilter] = useState('')
-  const [imagePromptMode, setImagePromptMode] = useState(false)
+  const [diagramPromptMode, setDiagramPromptMode] = useState(false)
 
   const setIsOpen = useCallback((open: boolean | ((prev: boolean) => boolean)) => {
     setIsOpenInternal(prev => {
@@ -179,25 +179,25 @@ export default function AICommandPalette({ editor }: AICommandPaletteProps) {
     }
   }, [savedSelection, savedDocContent, clearMessages, setSelectionContext, addMessage, setLoading, setIsOpen, selectedModel])
 
-  const handleGenerateImage = useCallback((prompt: string) => {
+  const handleGenerateDiagram = useCallback((prompt: string) => {
     if (!prompt.trim()) return
 
     // Note: Context is automatically pulled from document by the extension
-    editor.commands.insertImageFromPrompt(prompt.trim())
+    editor.commands.insertDiagramFromPrompt(prompt.trim())
     setIsOpen(false)
-    setImagePromptMode(false)
+    setDiagramPromptMode(false)
   }, [editor, setIsOpen])
 
-  const enterImagePromptMode = useCallback(() => {
-    setImagePromptMode(true)
+  const enterDiagramPromptMode = useCallback(() => {
+    setDiagramPromptMode(true)
     setFilter('')
     setFocusedIndex(0)
   }, [])
 
   // Build command list based on mode
   const commands = useMemo((): Command[] => {
-    if (imagePromptMode) {
-      // In image prompt mode, show no commands - user types description and presses Enter
+    if (diagramPromptMode) {
+      // In diagram prompt mode, show no commands - user types description and presses Enter
       return []
     }
 
@@ -223,7 +223,7 @@ export default function AICommandPalette({ editor }: AICommandPaletteProps) {
         { id: 'simplify', label: 'Simplify', group: 'Style', shortcut: '0', action: () => handleQuickEdit('edit', 'simplify', 'Simplify — plain words, short sentences') },
         { id: 'cadence', label: 'Improve cadence', group: 'Style', action: () => handleQuickEdit('edit', 'cadence', 'Improve the rhythm and flow of this prose') },
         // Create
-        { id: 'generate-image', label: 'Generate image', group: 'Create', action: () => enterImagePromptMode() },
+        { id: 'generate-diagram', label: 'Generate diagram', group: 'Create', action: () => enterDiagramPromptMode() },
       ]
     } else {
       return [
@@ -249,10 +249,10 @@ export default function AICommandPalette({ editor }: AICommandPaletteProps) {
         { id: 'critic', label: 'Read as critic', group: 'Audience', action: () => handleExplore('Read this as a hostile critic. What weaknesses would they find?', 'Read this as a hostile critic — where would you attack?') },
         { id: 'executive', label: 'Read as executive', group: 'Audience', action: () => handleExplore('Read this as a busy executive who skims. Would they get the point?', 'Skim this like a busy exec — do you get the point?') },
         // Create
-        { id: 'generate-image', label: 'Generate image', group: 'Create', action: () => enterImagePromptMode() },
+        { id: 'generate-diagram', label: 'Generate diagram', group: 'Create', action: () => enterDiagramPromptMode() },
       ]
     }
-  }, [hasSelection, imagePromptMode, handleQuickEdit, handleExplore, enterImagePromptMode])
+  }, [hasSelection, diagramPromptMode, handleQuickEdit, handleExplore, enterDiagramPromptMode])
 
   // Filter commands
   const filteredCommands = useMemo(() => {
@@ -284,7 +284,7 @@ export default function AICommandPalette({ editor }: AICommandPaletteProps) {
       setSavedDocContent(docContent)
       setFilter('')
       setFocusedIndex(0)
-      setImagePromptMode(false)
+      setDiagramPromptMode(false)
       setTimeout(() => inputRef.current?.focus(), 0)
     }
   }, [isOpen, getSelectedText, getDocContent])
@@ -331,16 +331,16 @@ export default function AICommandPalette({ editor }: AICommandPaletteProps) {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     const count = filteredCommands.length
 
-    // Handle image prompt mode specially
-    if (imagePromptMode) {
+    // Handle diagram prompt mode specially
+    if (diagramPromptMode) {
       if (e.key === 'Enter') {
         e.preventDefault()
         if (filter.trim()) {
-          handleGenerateImage(filter)
+          handleGenerateDiagram(filter)
         }
       } else if (e.key === 'Escape') {
         e.preventDefault()
-        setImagePromptMode(false)
+        setDiagramPromptMode(false)
         setFilter('')
       }
       return
@@ -393,10 +393,10 @@ export default function AICommandPalette({ editor }: AICommandPaletteProps) {
       <div ref={paletteRef} className="ai-palette">
         {/* Header */}
         <div className="ai-palette-header">
-          {imagePromptMode && (
+          {diagramPromptMode && (
             <button
               className="ai-palette-back"
-              onClick={() => { setImagePromptMode(false); setFilter('') }}
+              onClick={() => { setDiagramPromptMode(false); setFilter('') }}
             >
               ←
             </button>
@@ -410,8 +410,8 @@ export default function AICommandPalette({ editor }: AICommandPaletteProps) {
               setFocusedIndex(0)
             }}
             placeholder={
-              imagePromptMode
-                ? "Describe the image to generate..."
+              diagramPromptMode
+                ? "Describe the diagram to generate..."
                 : hasSelection
                   ? "Filter or ask about selection..."
                   : "Filter or ask about your writing..."
@@ -420,7 +420,7 @@ export default function AICommandPalette({ editor }: AICommandPaletteProps) {
             autoFocus
           />
           <div className="ai-palette-hint">
-            {imagePromptMode ? (
+            {diagramPromptMode ? (
               <><kbd>⏎</kbd> generate <kbd>esc</kbd> back</>
             ) : (
               <><kbd>↑↓</kbd> navigate <kbd>⏎</kbd> select <kbd>esc</kbd> close</>
@@ -454,20 +454,20 @@ export default function AICommandPalette({ editor }: AICommandPaletteProps) {
             </div>
           ))}
 
-          {imagePromptMode && (
+          {diagramPromptMode && (
             <div className="ai-palette-empty">
               <span className="ai-palette-image-hint">
-                🖼 {hasSelection ? 'Using selected text as context' : 'Using article as context'}
+                📊 {hasSelection ? 'Using selected text as context' : 'Using article as context'}
               </span>
               {filter ? (
                 <span>Press Enter to generate: "{filter.slice(0, 50)}{filter.length > 50 ? '...' : ''}"</span>
               ) : (
-                <span>Type a description for the image</span>
+                <span>Type a description for the diagram</span>
               )}
             </div>
           )}
 
-          {!imagePromptMode && filteredCommands.length === 0 && filter && (
+          {!diagramPromptMode && filteredCommands.length === 0 && filter && (
             <div className="ai-palette-empty">
               <span>Press Enter to ask: "{filter}"</span>
             </div>

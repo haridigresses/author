@@ -44,12 +44,14 @@ export default function UserMenu() {
     localStorage.setItem('userId', newUserId)
     setUserId(newUserId)
     setShowMenu(false)
+    window.dispatchEvent(new Event('auth-change'))
   }
 
   const handleSignOut = () => {
     localStorage.removeItem('userId')
     setUserId(null)
     setShowMenu(false)
+    window.dispatchEvent(new Event('auth-change'))
   }
 
   if (isLoading) {

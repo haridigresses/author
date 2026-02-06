@@ -94,13 +94,13 @@ const COMMANDS: CommandItem[] = [
     },
   },
   {
-    title: 'Image',
-    description: 'Generate an AI image',
+    title: 'Diagram',
+    description: 'Generate an AI diagram or flowchart',
     command: ({ editor, range }) => {
-      const prompt = window.prompt('Describe the image:')
+      const prompt = window.prompt('Describe the diagram:')
       if (prompt) {
         editor.chain().focus().deleteRange(range).run()
-        editor.commands.insertImageFromPrompt(prompt)
+        editor.commands.insertDiagramFromPrompt(prompt)
       }
     },
   },

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useQuery, useMutation } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import { Id } from "@/convex/_generated/dataModel"
@@ -13,6 +13,8 @@ export default function DocumentApp() {
   const [documentId, setDocumentId] = useState<Id<"documents"> | null>(null)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [userId, setUserId] = useState<Id<"users"> | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const createAnonymous = useMutation(api.users.createAnonymous)
 
   // Load userId from localStorage
   useEffect(() => {
@@ -20,7 +22,26 @@ export default function DocumentApp() {
     if (storedUserId) {
       setUserId(storedUserId as Id<"users">)
     }
+    setIsLoading(false)
   }, [])
+
+  // Listen for sign-out events from UserMenu
+  useEffect(() => {
+    const handleAuthChange = () => {
+      const storedUserId = localStorage.getItem('userId')
+      setUserId(storedUserId ? storedUserId as Id<"users"> : null)
+      if (!storedUserId) setDocumentId(null)
+    }
+    window.addEventListener('auth-change', handleAuthChange)
+    return () => window.removeEventListener('auth-change', handleAuthChange)
+  }, [])
+
+  const handleSignIn = useCallback(async () => {
+    const newUserId = await createAnonymous()
+    localStorage.setItem('userId', newUserId)
+    setUserId(newUserId)
+    window.dispatchEvent(new Event('auth-change'))
+  }, [createAnonymous])
 
   const documents = useQuery(api.documents.list, userId ? { userId } : "skip")
   const createDocument = useMutation(api.documents.create)
@@ -61,13 +82,16 @@ export default function DocumentApp() {
     setDocumentId(id)
   }
 
-  // Show sign-in prompt if no user
-  if (!userId) {
+  // Show landing page if no user
+  if (!userId && !isLoading) {
     return (
-      <div className="document-app-loading">
-        <div className="sign-in-prompt">
-          <h2>Welcome to Author</h2>
-          <p>Please sign in using the 👤 button in the top right to get started.</p>
+      <div className="landing-page">
+        <div className="landing-content">
+          <h1 className="landing-title">Author</h1>
+          <p className="landing-subtitle">A writing environment with AI assistance</p>
+          <button onClick={handleSignIn} className="landing-cta">
+            Start writing
+          </button>
         </div>
       </div>
     )
