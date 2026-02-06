@@ -2,7 +2,7 @@
 
 import { Editor } from '@tiptap/react'
 import { useRef, useEffect, useState } from 'react'
-import { useAI } from './AIContext'
+import { useAI, AI_MODELS } from './AIContext'
 import DiffView from './DiffView'
 
 interface AISidebarProps {
@@ -24,6 +24,8 @@ export default function AISidebar({ editor, tabAIEnabled, onToggleTabAI }: AISid
     setTrackChanges,
     sidebarExpanded,
     setSidebarExpanded,
+    selectedModel,
+    setSelectedModel,
   } = useAI()
 
   const [input, setInput] = useState('')
@@ -71,6 +73,7 @@ export default function AISidebar({ editor, tabAIEnabled, onToggleTabAI }: AISid
           documentContent: selectionContext?.docContent || editor.state.doc.textContent.slice(0, 5000),
           history,
           selectionContext: selectionContext?.text,
+          model: selectedModel,
         }),
       })
       const data = await res.json()
@@ -103,6 +106,15 @@ export default function AISidebar({ editor, tabAIEnabled, onToggleTabAI }: AISid
     <div className={`ai-sidebar ${sidebarExpanded ? 'ai-sidebar-expanded' : ''}`}>
       <div className="ai-sidebar-header">
         <h3>AI Assistant</h3>
+        <select
+          className="ai-model-picker"
+          value={selectedModel}
+          onChange={(e) => setSelectedModel(e.target.value)}
+        >
+          {AI_MODELS.map(m => (
+            <option key={m.id} value={m.id}>{m.label}</option>
+          ))}
+        </select>
         <div className="ai-header-actions">
           {messages.length > 0 && (
             <button className="ai-clear-btn" onClick={clearMessages} title="Clear conversation">

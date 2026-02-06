@@ -26,7 +26,7 @@ For each, explain: What's the "aha" for experts? What's the roadmap for novices?
 
 export async function POST(req: NextRequest) {
   try {
-    const { mode, content } = await req.json()
+    const { mode, content, model } = await req.json()
 
     if (!content || content.trim().length < 20) {
       return NextResponse.json({ error: 'Need more content to help' }, { status: 400 })
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     const prompt = STUCK_PROMPTS[mode] || STUCK_PROMPTS['next']
 
     const response = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: model || 'claude-sonnet-4-5',
       max_tokens: 800,
       messages: [
         {

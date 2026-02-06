@@ -7,14 +7,14 @@ const client = new Anthropic({
 
 export async function POST(req: NextRequest) {
   try {
-    const { content } = await req.json()
+    const { content, model } = await req.json()
 
     if (!content || content.trim().length < 100) {
       return NextResponse.json({ error: 'Need more content to check consistency' }, { status: 400 })
     }
 
     const response = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: model || 'claude-sonnet-4-5',
       max_tokens: 700,
       messages: [
         {

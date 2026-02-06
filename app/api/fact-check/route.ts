@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
-  const { text } = await req.json()
+  const { text, model } = await req.json()
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      model: model || 'claude-sonnet-4-5',
       max_tokens: 2048,
       system: `You are a fact-checker. Analyze the text for factual claims. For each claim that seems dubious, unverifiable, or potentially incorrect, output a JSON array of objects with these fields:
 - "claim": the exact text of the claim

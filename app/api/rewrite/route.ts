@@ -16,7 +16,7 @@ const TONE_PROMPTS: Record<string, string> = {
 
 export async function POST(req: NextRequest) {
   try {
-    const { tone, text, documentContext } = await req.json()
+    const { tone, text, documentContext, model } = await req.json()
 
     const systemPrompt = TONE_PROMPTS[tone]
     if (!systemPrompt) {
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     }
 
     const response = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: model || 'claude-sonnet-4-5',
       max_tokens: 1024,
       system: systemPrompt,
       messages: [

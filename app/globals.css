@@ -11,6 +11,50 @@ body {
   @apply bg-gray-50 text-gray-900;
 }
 
+/* Sleek scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+*:hover {
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+}
+
+.dark *:hover {
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 3px;
+}
+
+*:hover::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+*:hover::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.dark *:hover::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.dark *:hover::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
 /* TipTap editor styles */
 .ProseMirror {
   @apply outline-none;
@@ -295,7 +339,7 @@ body {
 
 /* Toolbar */
 .toolbar {
-  @apply sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-2 flex flex-wrap items-center gap-1.5 text-sm;
+  @apply flex-shrink-0 z-10 bg-white border-b border-gray-200 px-4 py-2 flex flex-wrap items-center gap-1.5 text-sm;
 }
 
 .toolbar-btn {
@@ -329,6 +373,111 @@ body {
 
 .toolbar-hint {
   @apply text-gray-400 text-xs;
+}
+
+/* Overflow menu trigger */
+.toolbar-overflow-btn {
+  @apply px-2 py-1 rounded text-xs font-bold text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors tracking-widest;
+}
+
+.toolbar-overflow-btn-open {
+  @apply bg-gray-100 text-gray-600;
+}
+
+/* Overflow dropdown panel */
+.toolbar-overflow-menu {
+  @apply absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[220px] z-20;
+}
+
+.toolbar-overflow-group {
+  @apply py-1;
+}
+
+.toolbar-overflow-group + .toolbar-overflow-group {
+  @apply border-t border-gray-100;
+}
+
+.toolbar-overflow-group-label {
+  @apply px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-gray-400;
+}
+
+.toolbar-overflow-item {
+  @apply flex items-center gap-2 w-full px-3 py-1.5 text-sm text-left text-gray-700 hover:bg-gray-50 transition-colors;
+}
+
+.toolbar-overflow-item-active {
+  @apply text-blue-600 bg-blue-50;
+}
+
+.toolbar-overflow-icon {
+  @apply w-6 text-center text-xs font-medium flex-shrink-0;
+}
+
+.toolbar-overflow-label {
+  @apply flex-1;
+}
+
+.toolbar-overflow-hint {
+  @apply text-xs text-gray-400 ml-auto pl-3 font-mono;
+}
+
+/* Mode buttons (Track / Mencken) */
+.toolbar-mode-btn {
+  @apply flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer border border-transparent;
+}
+
+.toolbar-mode-btn-active {
+  @apply bg-blue-500 text-white border-blue-500 hover:bg-blue-600 hover:text-white;
+}
+
+.toolbar-mode-icon {
+  @apply text-sm leading-none;
+}
+
+.toolbar-mode-label {
+  @apply leading-none;
+}
+
+/* Dark mode: Overflow menu */
+.dark .toolbar-overflow-btn {
+  @apply text-gray-500 hover:text-gray-300 hover:bg-gray-700;
+}
+
+.dark .toolbar-overflow-btn-open {
+  @apply bg-gray-700 text-gray-300;
+}
+
+.dark .toolbar-overflow-menu {
+  @apply bg-gray-800 border-gray-700 shadow-xl;
+}
+
+.dark .toolbar-overflow-group + .toolbar-overflow-group {
+  @apply border-gray-700;
+}
+
+.dark .toolbar-overflow-group-label {
+  @apply text-gray-500;
+}
+
+.dark .toolbar-overflow-item {
+  @apply text-gray-300 hover:bg-gray-700;
+}
+
+.dark .toolbar-overflow-item-active {
+  @apply text-blue-400 bg-blue-900/30;
+}
+
+.dark .toolbar-overflow-hint {
+  @apply text-gray-500;
+}
+
+/* Dark mode: Mode buttons */
+.dark .toolbar-mode-btn {
+  @apply text-gray-400 hover:text-gray-200 hover:bg-gray-700;
+}
+
+.dark .toolbar-mode-btn-active {
+  @apply bg-blue-600 text-white border-blue-600 hover:bg-blue-500 hover:text-white;
 }
 
 /* Modern toggle switches */
@@ -437,7 +586,11 @@ body {
 }
 
 .editor-main {
-  @apply flex-1 flex flex-col min-w-0 overflow-y-auto;
+  @apply flex-1 flex flex-col min-w-0 overflow-hidden;
+}
+
+.editor-scroll {
+  @apply flex-1 overflow-y-auto;
 }
 
 /* Status bar */
@@ -1055,6 +1208,22 @@ body {
 
 .ai-chat-send:disabled {
   @apply opacity-50 cursor-not-allowed;
+}
+
+.ai-model-picker {
+  @apply text-xs bg-transparent border border-gray-300 rounded px-1.5 py-0.5 text-gray-600 outline-none cursor-pointer;
+}
+
+.ai-model-picker:focus {
+  @apply border-blue-400 ring-1 ring-blue-100;
+}
+
+.dark .ai-model-picker {
+  @apply border-gray-600 text-gray-300 bg-gray-800;
+}
+
+.dark .ai-model-picker:focus {
+  @apply border-blue-500 ring-blue-900;
 }
 
 .ai-header-actions {
@@ -2029,6 +2198,152 @@ body {
 
 .dark .track-more {
   @apply text-gray-500;
+}
+
+/* Scratchpad Panel */
+.scratchpad {
+  @apply w-80 flex-shrink-0 h-full border-r border-gray-200 bg-white flex flex-col overflow-hidden transition-all duration-200;
+}
+
+.scratchpad-collapsed {
+  @apply w-0 border-r-0;
+}
+
+.scratchpad-header {
+  @apply flex items-center justify-between px-4 py-3 border-b border-gray-200 flex-shrink-0;
+}
+
+.scratchpad-header h3 {
+  @apply text-base font-semibold text-gray-900;
+}
+
+.scratchpad-collapse-btn {
+  @apply w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 rounded hover:bg-gray-100 text-sm;
+}
+
+.scratchpad-add-btn {
+  @apply mx-3 mt-3 px-3 py-1.5 text-xs font-medium border border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors flex-shrink-0;
+}
+
+.scratchpad-notes {
+  @apply flex-1 overflow-y-auto p-3 space-y-3;
+}
+
+.scratchpad-empty {
+  @apply text-sm text-gray-400 text-center py-8 px-4;
+}
+
+.scratchpad-note {
+  @apply bg-gray-50 rounded-lg border border-gray-200 overflow-hidden;
+}
+
+.scratchpad-note-header {
+  @apply flex items-center justify-between px-3 py-1.5 bg-gray-100;
+}
+
+.scratchpad-note-time {
+  @apply text-[10px] text-gray-400 font-medium;
+}
+
+.scratchpad-note-delete {
+  @apply w-5 h-5 flex items-center justify-center text-gray-300 hover:text-red-500 rounded hover:bg-red-50 text-xs transition-colors;
+}
+
+.scratchpad-note-textarea {
+  @apply w-full px-3 py-2 text-sm bg-transparent border-0 outline-none resize-none leading-relaxed placeholder:text-gray-400 min-h-[60px];
+}
+
+.scratchpad-footer {
+  @apply flex-shrink-0 border-t border-gray-200 p-3 pb-8;
+}
+
+.scratchpad-footer-label {
+  @apply text-[10px] font-medium uppercase tracking-wide text-gray-400 mb-2;
+}
+
+.scratchpad-actions {
+  @apply flex gap-1.5;
+}
+
+.scratchpad-action-btn {
+  @apply flex-1 px-2 py-1.5 text-xs font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-center;
+}
+
+.scratchpad-action-btn:disabled {
+  @apply opacity-40 cursor-not-allowed hover:bg-transparent;
+}
+
+.scratchpad-undo {
+  @apply flex items-center justify-between px-3 py-2 text-xs text-gray-500 bg-gray-100 rounded-lg border border-gray-200;
+}
+
+.scratchpad-undo-btn {
+  @apply text-blue-600 hover:text-blue-800 font-medium;
+}
+
+/* Dark mode: Scratchpad */
+.dark .scratchpad {
+  @apply bg-gray-900 border-gray-700;
+}
+
+.dark .scratchpad-header {
+  @apply border-gray-700;
+}
+
+.dark .scratchpad-header h3 {
+  @apply text-gray-100;
+}
+
+.dark .scratchpad-collapse-btn {
+  @apply text-gray-500 hover:text-gray-300 hover:bg-gray-700;
+}
+
+.dark .scratchpad-add-btn {
+  @apply border-gray-600 text-gray-400 hover:border-gray-500 hover:text-gray-300 hover:bg-gray-800;
+}
+
+.dark .scratchpad-note {
+  @apply bg-gray-800 border-gray-700;
+}
+
+.dark .scratchpad-note-header {
+  @apply bg-gray-800;
+}
+
+.dark .scratchpad-note-time {
+  @apply text-gray-500;
+}
+
+.dark .scratchpad-note-delete {
+  @apply text-gray-600 hover:text-red-400 hover:bg-red-900/30;
+}
+
+.dark .scratchpad-note-textarea {
+  @apply text-gray-200 placeholder:text-gray-600;
+}
+
+.dark .scratchpad-footer {
+  @apply border-gray-700;
+}
+
+.dark .scratchpad-footer-label {
+  @apply text-gray-500;
+}
+
+.dark .scratchpad-action-btn {
+  @apply border-gray-600 text-gray-300 hover:bg-gray-700;
+}
+
+.dark .scratchpad-empty {
+  @apply text-gray-500;
+}
+
+.dark .scratchpad-undo {
+  @apply bg-gray-800 border-gray-700 text-gray-400;
+}
+
+.dark .scratchpad-undo-btn {
+  @apply text-blue-400 hover:text-blue-300;
 }
 
 /* Sidebar Container */

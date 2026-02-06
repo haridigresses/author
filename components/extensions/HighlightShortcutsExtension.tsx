@@ -51,6 +51,14 @@ function getSelectionInfo(editor: any): { text: string; from: number; to: number
   }
 }
 
+function getSelectedModel(): string {
+  try {
+    return localStorage.getItem('author-ai-model') || 'claude-sonnet-4-5'
+  } catch {
+    return 'claude-sonnet-4-5'
+  }
+}
+
 function fireAction(editor: any, action: EditingAction) {
   const sel = getSelectionInfo(editor)
   if (!sel) return false
@@ -71,11 +79,12 @@ function fireAction(editor: any, action: EditingAction) {
   )
 
   const documentContext = editor.state.doc.textContent.slice(0, 2000)
+  const model = getSelectedModel()
 
   fetch('/api/edit', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action, text: sel.text, documentContext }),
+    body: JSON.stringify({ action, text: sel.text, documentContext, model }),
   })
     .then((res) => res.json())
     .then((data) => {
@@ -190,6 +199,7 @@ export const HighlightShortcutsExtension = Extension.create({
           )
 
           const documentContext = editor.state.doc.textContent.slice(0, 2000)
+          const model = getSelectedModel()
 
           fetch('/api/edit', {
             method: 'POST',
@@ -198,6 +208,7 @@ export const HighlightShortcutsExtension = Extension.create({
               action,
               text: pluginState.selectedText,
               documentContext,
+              model,
             }),
           })
             .then((res) => res.json())

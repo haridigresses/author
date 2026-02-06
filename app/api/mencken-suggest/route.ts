@@ -14,12 +14,12 @@ const ISSUE_PROMPTS: Record<string, string> = {
 
 export async function POST(request: Request) {
   try {
-    const { issueType, text, context, message } = await request.json()
+    const { issueType, text, context, message, model } = await request.json()
 
     const issuePrompt = ISSUE_PROMPTS[issueType] || 'Improve this text.'
 
     const response = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: model || 'claude-sonnet-4-5',
       max_tokens: 300,
       messages: [
         {

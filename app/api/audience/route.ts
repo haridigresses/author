@@ -17,7 +17,7 @@ const AUDIENCES: Record<string, string> = {
 
 export async function POST(req: NextRequest) {
   try {
-    const { content, audience } = await req.json()
+    const { content, audience, model } = await req.json()
 
     if (!content || content.trim().length < 100) {
       return NextResponse.json({ error: 'Need more content to analyze' }, { status: 400 })
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     const audienceDesc = AUDIENCES[audience] || AUDIENCES['skeptic']
 
     const response = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: model || 'claude-sonnet-4-5',
       max_tokens: 600,
       messages: [
         {

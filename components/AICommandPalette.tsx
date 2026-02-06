@@ -26,6 +26,7 @@ export default function AICommandPalette({ editor }: AICommandPaletteProps) {
     clearMessages,
     setSelectionContext,
     setCommandPaletteOpen,
+    selectedModel,
   } = useAI()
 
   const [isOpen, setIsOpenInternal] = useState(false)
@@ -65,8 +66,8 @@ export default function AICommandPalette({ editor }: AICommandPaletteProps) {
     const docContent = savedDocContent
     const endpoint = type === 'rewrite' ? '/api/rewrite' : '/api/edit'
     const body = type === 'rewrite'
-      ? { tone: action, text, documentContext: docContent }
-      : { action, text, documentContext: docContent }
+      ? { tone: action, text, documentContext: docContent, model: selectedModel }
+      : { action, text, documentContext: docContent, model: selectedModel }
 
     clearMessages()
     setSelectionContext({ text, docContent })
@@ -95,7 +96,7 @@ export default function AICommandPalette({ editor }: AICommandPaletteProps) {
     } finally {
       setLoading(false)
     }
-  }, [savedSelection, savedDocContent, clearMessages, setSelectionContext, addMessage, setLoading, setIsOpen])
+  }, [savedSelection, savedDocContent, clearMessages, setSelectionContext, addMessage, setLoading, setIsOpen, selectedModel])
 
   const handleExplore = useCallback(async (prompt: string, label: string) => {
     const docContent = savedDocContent
@@ -115,6 +116,7 @@ export default function AICommandPalette({ editor }: AICommandPaletteProps) {
           message: prompt,
           documentContent: docContent,
           history: [],
+          model: selectedModel,
         }),
       })
       const data = await res.json()
@@ -127,7 +129,7 @@ export default function AICommandPalette({ editor }: AICommandPaletteProps) {
     } finally {
       setLoading(false)
     }
-  }, [savedDocContent, clearMessages, setSelectionContext, addMessage, setLoading, setIsOpen])
+  }, [savedDocContent, clearMessages, setSelectionContext, addMessage, setLoading, setIsOpen, selectedModel])
 
   const handleCustomQuestion = useCallback(async (question: string) => {
     if (!question.trim()) return
@@ -159,6 +161,7 @@ export default function AICommandPalette({ editor }: AICommandPaletteProps) {
           documentContent: docContent,
           history: [],
           selectionContext: text || undefined,
+          model: selectedModel,
         }),
       })
       const data = await res.json()
@@ -172,7 +175,7 @@ export default function AICommandPalette({ editor }: AICommandPaletteProps) {
     } finally {
       setLoading(false)
     }
-  }, [savedSelection, savedDocContent, clearMessages, setSelectionContext, addMessage, setLoading, setIsOpen])
+  }, [savedSelection, savedDocContent, clearMessages, setSelectionContext, addMessage, setLoading, setIsOpen, selectedModel])
 
   const handleGenerateImage = useCallback((prompt: string) => {
     if (!prompt.trim()) return
@@ -201,50 +204,50 @@ export default function AICommandPalette({ editor }: AICommandPaletteProps) {
     if (hasSelection) {
       return [
         // Tone
-        { id: 'formal', label: 'Formal tone', group: 'Tone', shortcut: '1', action: () => handleQuickEdit('rewrite', 'formal', 'Rewrite: Formal') },
-        { id: 'casual', label: 'Casual tone', group: 'Tone', shortcut: '2', action: () => handleQuickEdit('rewrite', 'casual', 'Rewrite: Casual') },
-        { id: 'academic', label: 'Academic tone', group: 'Tone', shortcut: '3', action: () => handleQuickEdit('rewrite', 'academic', 'Rewrite: Academic') },
-        { id: 'witty', label: 'Witty tone', group: 'Tone', action: () => handleQuickEdit('rewrite', 'witty', 'Rewrite: Witty') },
-        { id: 'poetic', label: 'Poetic tone', group: 'Tone', action: () => handleQuickEdit('rewrite', 'poetic', 'Rewrite: Poetic') },
+        { id: 'formal', label: 'Formal tone', group: 'Tone', shortcut: '1', action: () => handleQuickEdit('rewrite', 'formal', 'Make this sound more polished and professional') },
+        { id: 'casual', label: 'Casual tone', group: 'Tone', shortcut: '2', action: () => handleQuickEdit('rewrite', 'casual', 'Loosen this up — make it conversational') },
+        { id: 'academic', label: 'Academic tone', group: 'Tone', shortcut: '3', action: () => handleQuickEdit('rewrite', 'academic', 'Rewrite this with scholarly precision') },
+        { id: 'witty', label: 'Witty tone', group: 'Tone', action: () => handleQuickEdit('rewrite', 'witty', 'Give this some wit and cleverness') },
+        { id: 'poetic', label: 'Poetic tone', group: 'Tone', action: () => handleQuickEdit('rewrite', 'poetic', 'Make this lyrical and evocative') },
         // Fix
-        { id: 'copyedit', label: 'Copyedit', group: 'Fix', shortcut: '4', action: () => handleQuickEdit('edit', 'copyedit', 'Fix: Copyedit') },
-        { id: 'grammar', label: 'Fix grammar', group: 'Fix', shortcut: '5', action: () => handleQuickEdit('edit', 'grammar', 'Fix: Grammar') },
-        { id: 'redundancy', label: 'Remove redundancy', group: 'Fix', action: () => handleQuickEdit('edit', 'redundancy', 'Fix: Redundancy') },
+        { id: 'copyedit', label: 'Copyedit', group: 'Fix', shortcut: '4', action: () => handleQuickEdit('edit', 'copyedit', 'Clean up spelling, punctuation, and formatting') },
+        { id: 'grammar', label: 'Fix grammar', group: 'Fix', shortcut: '5', action: () => handleQuickEdit('edit', 'grammar', 'Fix the grammar but keep my voice') },
+        { id: 'redundancy', label: 'Remove redundancy', group: 'Fix', action: () => handleQuickEdit('edit', 'redundancy', 'Cut the repetition — say it once, well') },
         // Length
-        { id: 'expand', label: 'Expand', group: 'Length', shortcut: '6', action: () => handleQuickEdit('edit', 'expand', 'Length: Expand') },
-        { id: 'shorten', label: 'Shorten', group: 'Length', shortcut: '7', action: () => handleQuickEdit('edit', 'shorten', 'Length: Shorten') },
+        { id: 'expand', label: 'Expand', group: 'Length', shortcut: '6', action: () => handleQuickEdit('edit', 'expand', 'Flesh this out with more detail and evidence') },
+        { id: 'shorten', label: 'Shorten', group: 'Length', shortcut: '7', action: () => handleQuickEdit('edit', 'shorten', 'Tighten this — cut everything that doesn\'t earn its place') },
         // Meaning
-        { id: 'clarity', label: 'Clarify', group: 'Meaning', shortcut: '8', action: () => handleQuickEdit('edit', 'clarity', 'Meaning: Clarify') },
-        { id: 'strengthen', label: 'Strengthen', group: 'Meaning', shortcut: '9', action: () => handleQuickEdit('edit', 'strengthen', 'Meaning: Strengthen') },
+        { id: 'clarity', label: 'Clarify', group: 'Meaning', shortcut: '8', action: () => handleQuickEdit('edit', 'clarity', 'Make this unmistakably clear') },
+        { id: 'strengthen', label: 'Strengthen', group: 'Meaning', shortcut: '9', action: () => handleQuickEdit('edit', 'strengthen', 'Sharpen the argument and make it more compelling') },
         // Style
-        { id: 'simplify', label: 'Simplify', group: 'Style', shortcut: '0', action: () => handleQuickEdit('edit', 'simplify', 'Style: Simplify') },
-        { id: 'cadence', label: 'Improve cadence', group: 'Style', action: () => handleQuickEdit('edit', 'cadence', 'Style: Cadence') },
+        { id: 'simplify', label: 'Simplify', group: 'Style', shortcut: '0', action: () => handleQuickEdit('edit', 'simplify', 'Simplify — plain words, short sentences') },
+        { id: 'cadence', label: 'Improve cadence', group: 'Style', action: () => handleQuickEdit('edit', 'cadence', 'Improve the rhythm and flow of this prose') },
         // Create
         { id: 'generate-image', label: 'Generate image', group: 'Create', action: () => enterImagePromptMode() },
       ]
     } else {
       return [
         // Stuck
-        { id: 'next', label: 'What should I write next?', group: 'Stuck', shortcut: '1', action: () => handleExplore('What should I write next? Give me 3 concrete directions.', 'What next?') },
-        { id: 'end', label: 'How should I end this?', group: 'Stuck', shortcut: '2', action: () => handleExplore('How should I end this piece? Give me 3 options.', 'End it') },
-        { id: 'framework', label: 'Suggest a framework', group: 'Stuck', shortcut: '3', action: () => handleExplore('Suggest 3 organizing frameworks for this piece.', 'Framework') },
-        { id: 'transition', label: 'Help with transitions', group: 'Stuck', action: () => handleExplore("I'm stuck on transitions. Suggest ways to connect my sections better.", 'Transitions') },
-        { id: 'expand-idea', label: 'What to expand?', group: 'Stuck', action: () => handleExplore('What points deserve more depth? What should I expand on?', 'Expand') },
-        { id: 'angles', label: 'Alternative angles', group: 'Stuck', action: () => handleExplore('What alternative angles or perspectives could I explore?', 'Angles') },
+        { id: 'next', label: 'What should I write next?', group: 'Stuck', shortcut: '1', action: () => handleExplore('What should I write next? Give me 3 concrete directions.', 'I\'m stuck — what should I write next?') },
+        { id: 'end', label: 'How should I end this?', group: 'Stuck', shortcut: '2', action: () => handleExplore('How should I end this piece? Give me 3 options.', 'How should I land this piece?') },
+        { id: 'framework', label: 'Suggest a framework', group: 'Stuck', shortcut: '3', action: () => handleExplore('Suggest 3 organizing frameworks for this piece.', 'What framework could hold this together?') },
+        { id: 'transition', label: 'Help with transitions', group: 'Stuck', action: () => handleExplore("I'm stuck on transitions. Suggest ways to connect my sections better.", 'My sections feel disconnected — help me bridge them') },
+        { id: 'expand-idea', label: 'What to expand?', group: 'Stuck', action: () => handleExplore('What points deserve more depth? What should I expand on?', 'Which ideas here deserve more room to breathe?') },
+        { id: 'angles', label: 'Alternative angles', group: 'Stuck', action: () => handleExplore('What alternative angles or perspectives could I explore?', 'What angles am I missing?') },
         // Analyze
-        { id: 'summarize', label: 'Summarize', group: 'Analyze', shortcut: '4', action: () => handleExplore('Give me a TL;DR of my piece and list the main beats.', 'Summarize') },
-        { id: 'titles', label: 'Generate titles', group: 'Analyze', shortcut: '5', action: () => handleExplore('Generate 5 compelling title options in different styles.', 'Titles') },
-        { id: 'hooks', label: 'Opening hooks', group: 'Analyze', action: () => handleExplore('Generate 5 opening hooks: bold claim, story, question, contrast, statistic.', 'Hooks') },
-        { id: 'takeaways', label: 'Reader takeaways', group: 'Analyze', action: () => handleExplore('What would readers take away from this?', 'Takeaways') },
-        { id: 'consistency', label: 'Check consistency', group: 'Analyze', action: () => handleExplore('Check for logical contradictions or inconsistencies in my argument.', 'Consistency') },
-        { id: 'research', label: 'Research gaps', group: 'Analyze', action: () => handleExplore('What claims need sources? Where are the research gaps?', 'Research gaps') },
-        { id: 'factcheck', label: 'Fact-check', group: 'Analyze', action: () => handleExplore('Fact-check this piece. Flag any questionable claims.', 'Fact-check') },
+        { id: 'summarize', label: 'Summarize', group: 'Analyze', shortcut: '4', action: () => handleExplore('Give me a TL;DR of my piece and list the main beats.', 'Give me the TL;DR — what are the main beats?') },
+        { id: 'titles', label: 'Generate titles', group: 'Analyze', shortcut: '5', action: () => handleExplore('Generate 5 compelling title options in different styles.', 'Give me 5 title options in different styles') },
+        { id: 'hooks', label: 'Opening hooks', group: 'Analyze', action: () => handleExplore('Generate 5 opening hooks: bold claim, story, question, contrast, statistic.', 'Write me 5 opening hooks that would grab a reader') },
+        { id: 'takeaways', label: 'Reader takeaways', group: 'Analyze', action: () => handleExplore('What would readers take away from this?', 'What would a reader actually remember from this?') },
+        { id: 'consistency', label: 'Check consistency', group: 'Analyze', action: () => handleExplore('Check for logical contradictions or inconsistencies in my argument.', 'Am I contradicting myself anywhere?') },
+        { id: 'research', label: 'Research gaps', group: 'Analyze', action: () => handleExplore('What claims need sources? Where are the research gaps?', 'Which claims need backing? Where are the gaps?') },
+        { id: 'factcheck', label: 'Fact-check', group: 'Analyze', action: () => handleExplore('Fact-check this piece. Flag any questionable claims.', 'Fact-check this — flag anything questionable') },
         // Audience
-        { id: 'skeptic', label: 'Read as skeptic', group: 'Audience', shortcut: '6', action: () => handleExplore('Read this as a skeptic. What would they think?', 'Skeptic') },
-        { id: 'expert', label: 'Read as expert', group: 'Audience', shortcut: '7', action: () => handleExplore('Read this as an expert in the field. What would they think?', 'Expert') },
-        { id: 'newcomer', label: 'Read as newcomer', group: 'Audience', action: () => handleExplore('Read this as someone new to the topic. Would they follow along?', 'Newcomer') },
-        { id: 'critic', label: 'Read as critic', group: 'Audience', action: () => handleExplore('Read this as a hostile critic. What weaknesses would they find?', 'Critic') },
-        { id: 'executive', label: 'Read as executive', group: 'Audience', action: () => handleExplore('Read this as a busy executive who skims. Would they get the point?', 'Executive') },
+        { id: 'skeptic', label: 'Read as skeptic', group: 'Audience', shortcut: '6', action: () => handleExplore('Read this as a skeptic. What would they think?', 'Read this as a skeptic — where would you push back?') },
+        { id: 'expert', label: 'Read as expert', group: 'Audience', shortcut: '7', action: () => handleExplore('Read this as an expert in the field. What would they think?', 'Read this as a domain expert — what feels off?') },
+        { id: 'newcomer', label: 'Read as newcomer', group: 'Audience', action: () => handleExplore('Read this as someone new to the topic. Would they follow along?', 'Read this cold — would a newcomer follow along?') },
+        { id: 'critic', label: 'Read as critic', group: 'Audience', action: () => handleExplore('Read this as a hostile critic. What weaknesses would they find?', 'Read this as a hostile critic — where would you attack?') },
+        { id: 'executive', label: 'Read as executive', group: 'Audience', action: () => handleExplore('Read this as a busy executive who skims. Would they get the point?', 'Skim this like a busy exec — do you get the point?') },
         // Create
         { id: 'generate-image', label: 'Generate image', group: 'Create', action: () => enterImagePromptMode() },
       ]

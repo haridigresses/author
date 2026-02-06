@@ -3,6 +3,7 @@
 import { Editor } from '@tiptap/react'
 import { useState, useEffect } from 'react'
 import { menckenKey, MenckenIssue } from './extensions/MenckenExtension'
+import { useAI } from './AIContext'
 
 interface MenckenPanelProps {
   editor: Editor
@@ -49,6 +50,7 @@ const ISSUE_LABELS: Record<string, { label: string; color: string; description: 
 }
 
 export default function MenckenPanel({ editor, onClose }: MenckenPanelProps) {
+  const { selectedModel } = useAI()
   const [issues, setIssues] = useState<MenckenIssue[]>([])
   const [suggestions, setSuggestions] = useState<Map<number, AISuggestion>>(new Map())
   const [loadingAll, setLoadingAll] = useState(false)
@@ -116,6 +118,7 @@ export default function MenckenPanel({ editor, onClose }: MenckenPanelProps) {
           text,
           context,
           message: issue.message,
+          model: selectedModel,
         }),
       })
       const data = await res.json()

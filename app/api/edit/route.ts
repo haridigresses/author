@@ -20,7 +20,7 @@ const ACTION_PROMPTS: Record<string, string> = {
 
 export async function POST(req: NextRequest) {
   try {
-    const { action, text, documentContext } = await req.json()
+    const { action, text, documentContext, model } = await req.json()
 
     const systemPrompt = ACTION_PROMPTS[action]
     if (!systemPrompt) {
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     }
 
     const response = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: model || 'claude-sonnet-4-5',
       max_tokens: 1024,
       system: systemPrompt,
       messages: [

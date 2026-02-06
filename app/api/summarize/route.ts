@@ -7,7 +7,7 @@ const client = new Anthropic({
 
 export async function POST(req: NextRequest) {
   try {
-    const { content, mode } = await req.json()
+    const { content, mode, model } = await req.json()
 
     if (!content || content.trim().length < 50) {
       return NextResponse.json({ error: 'Need more content to summarize' }, { status: 400 })
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     }
 
     const response = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: model || 'claude-sonnet-4-5',
       max_tokens: 500,
       messages: [{ role: 'user', content: prompt }],
     })

@@ -36,6 +36,7 @@ import { CommandPalette, DiffView } from './CommandPalette'
 import ShortcutCheatsheet from './ShortcutCheatsheet'
 import { AIProvider } from './AIContext'
 import Sidebar from './Sidebar'
+import Scratchpad from './Scratchpad'
 import AICommandPalette from './AICommandPalette'
 import { useAutosave } from './hooks/useAutosave'
 import { useDarkMode } from './hooks/useDarkMode'
@@ -50,7 +51,15 @@ export default function Editor() {
   const [trackChangesEnabled, setTrackChangesEnabled] = useState(false)
   const [menckenEnabled, setMenckenEnabled] = useState(false)
   const [tabAIEnabled, setTabAIEnabled] = useState(false)
+  const [scratchpadOpen, setScratchpadOpen] = useState(() => {
+    try { return localStorage.getItem('author-scratchpad-open') === 'true' } catch { return false }
+  })
   const { dark, toggle: toggleDark } = useDarkMode()
+
+  // Persist scratchpad open state
+  useEffect(() => {
+    try { localStorage.setItem('author-scratchpad-open', String(scratchpadOpen)) } catch {}
+  }, [scratchpadOpen])
 
   const editor = useEditor({
     extensions: [
@@ -356,6 +365,11 @@ export default function Editor() {
   return (
     <AIProvider>
       <div className="editor-layout editor-layout-with-panel">
+        <Scratchpad
+          editor={editor}
+          open={scratchpadOpen}
+          onClose={() => setScratchpadOpen(false)}
+        />
         <div className="editor-main">
           <Toolbar
             editor={editor}
@@ -369,8 +383,12 @@ export default function Editor() {
               editor.commands.toggleMencken(enabled)
               setMenckenEnabled(enabled)
             }}
+            scratchpadOpen={scratchpadOpen}
+            onToggleScratchpad={() => setScratchpadOpen(prev => !prev)}
           />
-          <EditorContent editor={editor} />
+          <div className="editor-scroll">
+            <EditorContent editor={editor} />
+          </div>
           <StatusBar editor={editor} />
           {shortcutsState && (
             <>

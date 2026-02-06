@@ -8,7 +8,7 @@ const client = new Anthropic({
 
 export async function POST(req: NextRequest) {
   try {
-    const { message, documentContent, history, selectionContext } = await req.json()
+    const { message, documentContent, history, selectionContext, model } = await req.json()
 
     if (!message) {
       return NextResponse.json({ error: 'No message provided' }, { status: 400 })
@@ -52,7 +52,7 @@ Engage in a natural conversation about the writing. Be constructive, specific, a
     }
 
     const response = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: model || 'claude-sonnet-4-5',
       max_tokens: 1000,
       system: systemPrompt,
       messages,

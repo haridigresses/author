@@ -1,6 +1,16 @@
 'use client'
 
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react'
+
+export const AI_MODELS = [
+  { id: 'claude-opus-4-6', label: 'Opus 4.6' },
+  { id: 'claude-sonnet-4-5', label: 'Sonnet 4.5' },
+  { id: 'claude-haiku-4-5', label: 'Haiku 4.5' },
+] as const
+
+export const DEFAULT_MODEL = 'claude-sonnet-4-5'
+
+const MODEL_STORAGE_KEY = 'author-ai-model'
 
 interface ChatMessage {
   role: 'user' | 'assistant' | 'system'
@@ -37,6 +47,10 @@ interface AIContextType {
   // Command palette open state (to hide bubble menu)
   commandPaletteOpen: boolean
   setCommandPaletteOpen: (open: boolean) => void
+
+  // Model selection
+  selectedModel: string
+  setSelectedModel: (model: string) => void
 }
 
 const AIContext = createContext<AIContextType | null>(null)
@@ -49,6 +63,22 @@ export function AIProvider({ children }: { children: ReactNode }) {
   const [trackChanges, setTrackChangesState] = useState(true) // Default on
   const [sidebarExpanded, setSidebarExpanded] = useState(false)
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
+  const [selectedModel, setSelectedModelState] = useState(DEFAULT_MODEL)
+
+  // Load model from localStorage on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(MODEL_STORAGE_KEY)
+      if (stored && AI_MODELS.some(m => m.id === stored)) {
+        setSelectedModelState(stored)
+      }
+    } catch {}
+  }, [])
+
+  const setSelectedModel = useCallback((model: string) => {
+    setSelectedModelState(model)
+    try { localStorage.setItem(MODEL_STORAGE_KEY, model) } catch {}
+  }, [])
 
   const setLoading = useCallback((value: boolean) => {
     setLoadingState(value)
@@ -97,6 +127,8 @@ export function AIProvider({ children }: { children: ReactNode }) {
       setSidebarExpanded,
       commandPaletteOpen,
       setCommandPaletteOpen,
+      selectedModel,
+      setSelectedModel,
     }}>
       {children}
     </AIContext.Provider>
