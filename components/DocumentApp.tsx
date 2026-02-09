@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { useQuery, useMutation } from "convex/react"
+import { useQuery, useMutation, useConvexAuth } from "convex/react"
+import { useAuthActions } from "@convex-dev/auth/react"
 import { api } from "@/convex/_generated/api"
 import { Id } from "@/convex/_generated/dataModel"
 import Editor from "./Editor"
@@ -12,44 +13,20 @@ const LAST_DOC_KEY = "author-last-document"
 export default function DocumentApp() {
   const [documentId, setDocumentId] = useState<Id<"documents"> | null>(null)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-  const [userId, setUserId] = useState<Id<"users"> | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const createAnonymous = useMutation(api.users.createAnonymous)
+  const { isAuthenticated, isLoading } = useConvexAuth()
+  const { signIn } = useAuthActions()
 
-  // Load userId from localStorage
-  useEffect(() => {
-    const storedUserId = localStorage.getItem('userId')
-    if (storedUserId) {
-      setUserId(storedUserId as Id<"users">)
-    }
-    setIsLoading(false)
-  }, [])
+  const handleSignIn = useCallback(() => {
+    void signIn("google")
+  }, [signIn])
 
-  // Listen for sign-out events from UserMenu
-  useEffect(() => {
-    const handleAuthChange = () => {
-      const storedUserId = localStorage.getItem('userId')
-      setUserId(storedUserId ? storedUserId as Id<"users"> : null)
-      if (!storedUserId) setDocumentId(null)
-    }
-    window.addEventListener('auth-change', handleAuthChange)
-    return () => window.removeEventListener('auth-change', handleAuthChange)
-  }, [])
-
-  const handleSignIn = useCallback(async () => {
-    const newUserId = await createAnonymous()
-    localStorage.setItem('userId', newUserId)
-    setUserId(newUserId)
-    window.dispatchEvent(new Event('auth-change'))
-  }, [createAnonymous])
-
-  const documents = useQuery(api.documents.list, userId ? { userId } : "skip")
+  const documents = useQuery(api.documents.list, isAuthenticated ? {} : "skip")
   const createDocument = useMutation(api.documents.create)
   const updateDocument = useMutation(api.documents.update)
 
   // On mount, restore last document or create one
   useEffect(() => {
-    if (!userId || documents === undefined) return // Still loading or no user
+    if (!isAuthenticated || documents === undefined) return
 
     const lastDocId = localStorage.getItem(LAST_DOC_KEY)
 
@@ -59,11 +36,11 @@ export default function DocumentApp() {
       setDocumentId(documents[0]._id)
     } else {
       // No documents - create one
-      createDocument({ title: "Untitled", userId }).then((id) => {
+      createDocument({ title: "Untitled" }).then((id) => {
         setDocumentId(id)
       })
     }
-  }, [documents, createDocument, userId])
+  }, [documents, createDocument, isAuthenticated])
 
   // Persist selected document
   useEffect(() => {
@@ -82,15 +59,15 @@ export default function DocumentApp() {
     setDocumentId(id)
   }
 
-  // Show landing page if no user
-  if (!userId && !isLoading) {
+  // Show landing page if not authenticated
+  if (!isAuthenticated && !isLoading) {
     return (
       <div className="landing-page">
         <div className="landing-content">
           <h1 className="landing-title">Author</h1>
           <p className="landing-subtitle">A writing environment with AI assistance</p>
           <button onClick={handleSignIn} className="landing-cta">
-            Start writing
+            Sign in with Google
           </button>
         </div>
       </div>
@@ -122,11 +99,10 @@ export default function DocumentApp() {
             )}
           </svg>
         </button>
-        {!sidebarCollapsed && userId && (
+        {!sidebarCollapsed && (
           <DocumentList
             currentDocumentId={documentId}
             onSelect={handleSelectDocument}
-            userId={userId}
           />
         )}
       </div>

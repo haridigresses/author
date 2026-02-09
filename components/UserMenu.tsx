@@ -1,26 +1,15 @@
 'use client'
 
-import { useMutation } from "convex/react"
-import { api } from "@/convex/_generated/api"
-import { useState, useEffect, useRef } from "react"
-import type { Id } from "@/convex/_generated/dataModel"
+import { useConvexAuth } from "convex/react"
+import { useAuthActions } from "@convex-dev/auth/react"
+import { useState, useRef, useEffect } from "react"
 
 export default function UserMenu() {
-  const [userId, setUserId] = useState<Id<"users"> | null>(null)
+  const { isAuthenticated, isLoading } = useConvexAuth()
+  const { signIn, signOut } = useAuthActions()
   const [showMenu, setShowMenu] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
   const menuRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
-  const createAnonymous = useMutation(api.users.createAnonymous)
-
-  // Load user from localStorage on mount
-  useEffect(() => {
-    const storedUserId = localStorage.getItem('userId')
-    if (storedUserId) {
-      setUserId(storedUserId as Id<"users">)
-    }
-    setIsLoading(false)
-  }, [])
 
   // Close menu on outside click
   useEffect(() => {
@@ -39,25 +28,19 @@ export default function UserMenu() {
     return () => document.removeEventListener('mousedown', handleClick)
   }, [showMenu])
 
-  const handleSignIn = async () => {
-    const newUserId = await createAnonymous()
-    localStorage.setItem('userId', newUserId)
-    setUserId(newUserId)
-    setShowMenu(false)
-    window.dispatchEvent(new Event('auth-change'))
+  const handleSignIn = () => {
+    void signIn("google")
   }
 
   const handleSignOut = () => {
-    localStorage.removeItem('userId')
-    setUserId(null)
+    void signOut()
     setShowMenu(false)
-    window.dispatchEvent(new Event('auth-change'))
   }
 
   if (isLoading) {
     return (
       <button className="toolbar-btn" disabled>
-        ⋯
+        &#x22EF;
       </button>
     )
   }
@@ -68,13 +51,13 @@ export default function UserMenu() {
         ref={buttonRef}
         onClick={() => setShowMenu(!showMenu)}
         className={`toolbar-btn ${showMenu ? 'toolbar-btn-active' : ''}`}
-        title={userId ? "Account" : "Sign in"}
+        title={isAuthenticated ? "Account" : "Sign in"}
       >
-        👤
+        &#x1F464;
       </button>
       {showMenu && (
         <div ref={menuRef} className="user-menu">
-          {userId ? (
+          {isAuthenticated ? (
             <>
               <div className="user-menu-status">Signed in</div>
               <button onClick={handleSignOut} className="user-menu-item">
@@ -83,7 +66,7 @@ export default function UserMenu() {
             </>
           ) : (
             <button onClick={handleSignIn} className="user-menu-item">
-              Sign in
+              Sign in with Google
             </button>
           )}
         </div>

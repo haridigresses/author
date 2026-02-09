@@ -7,16 +7,15 @@ import { Id } from "@/convex/_generated/dataModel"
 interface DocumentListProps {
   currentDocumentId: Id<"documents"> | null
   onSelect: (id: Id<"documents">) => void
-  userId: Id<"users">
 }
 
-export default function DocumentList({ currentDocumentId, onSelect, userId }: DocumentListProps) {
-  const documents = useQuery(api.documents.list, { userId }) ?? []
+export default function DocumentList({ currentDocumentId, onSelect }: DocumentListProps) {
+  const documents = useQuery(api.documents.list, {}) ?? []
   const createDocument = useMutation(api.documents.create)
   const removeDocument = useMutation(api.documents.remove)
 
   const handleCreate = async () => {
-    const id = await createDocument({ title: "Untitled", userId })
+    const id = await createDocument({ title: "Untitled" })
     onSelect(id)
   }
 

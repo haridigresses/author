@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.27.0",
+    "@auth/core": "^0.37.4",
+    "@convex-dev/auth": "^0.0.90",
     "@tiptap/core": "^2.1.13",
     "@tiptap/extension-bubble-menu": "^2.27.2",
     "@tiptap/extension-floating-menu": "^2.27.2",
@@ -34,7 +36,7 @@
     "@tiptap/starter-kit": "^2.1.13",
     "@tiptap/suggestion": "^2.27.2",
     "convex": "^1.31.7",
-    "next": "^14.0.0",
+    "next": "^16.1.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "tippy.js": "^6.3.7",
