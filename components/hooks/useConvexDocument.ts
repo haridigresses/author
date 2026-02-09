@@ -12,22 +12,26 @@ export function useConvexDocument(editor: Editor | null, documentId: Id<"documen
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const lastSavedRef = useRef<string>("")
-  const initialLoadDone = useRef(false)
+  const [loaded, setLoaded] = useState(false)
 
+  // Reset loaded flag when document ID changes
+  useEffect(() => {
+    setLoaded(false)
+  }, [documentId])
+
+  // Subscribe to documents.get only until initial content is loaded,
+  // then unsubscribe ("skip") to stop the reactive read loop.
+  // The editor is the source of truth after load — no need to re-read
+  // the full content (potentially MB of base64 images) on every save.
   const document = useQuery(
     api.documents.get,
-    documentId ? { id: documentId } : "skip"
+    documentId && !loaded ? { id: documentId } : "skip"
   )
   const updateDocument = useMutation(api.documents.update)
 
-  // Reset initial load flag when document ID changes
+  // Load document content on initial fetch
   useEffect(() => {
-    initialLoadDone.current = false
-  }, [documentId])
-
-  // Load document content only on initial load (not on reactive updates)
-  useEffect(() => {
-    if (!editor || !document || initialLoadDone.current) return
+    if (!editor || !document || loaded) return
 
     if (document.content) {
       try {
@@ -38,8 +42,8 @@ export function useConvexDocument(editor: Editor | null, documentId: Id<"documen
         // Invalid JSON - ignore
       }
     }
-    initialLoadDone.current = true
-  }, [editor, document])
+    setLoaded(true)
+  }, [editor, document, loaded])
 
   // Save function
   const save = useCallback(async () => {

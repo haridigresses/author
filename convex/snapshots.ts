@@ -12,11 +12,17 @@ export const list = query({
     const doc = await ctx.db.get(args.documentId)
     if (!doc || doc.userId !== userId) return []
 
-    return await ctx.db
+    const snaps = await ctx.db
       .query("snapshots")
       .withIndex("by_document", (q) => q.eq("documentId", args.documentId))
       .order("desc")
-      .take(100)
+      .take(50)
+    // Strip large fields — timeline only needs metadata.
+    // contentJson is fetched separately via getSnapshot when restoring.
+    return snaps.map(({ markdown, contentJson, ...meta }) => ({
+      ...meta,
+      hasContentJson: !!contentJson,
+    }))
   },
 })
 
@@ -68,6 +74,22 @@ export const create = mutation({
     }
 
     return id
+  },
+})
+
+export const getSnapshot = query({
+  args: { id: v.id("snapshots") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx)
+    if (!userId) return null
+
+    const snap = await ctx.db.get(args.id)
+    if (!snap) return null
+
+    const doc = await ctx.db.get(snap.documentId)
+    if (!doc || doc.userId !== userId) return null
+
+    return snap
   },
 })
 

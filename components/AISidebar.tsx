@@ -5,13 +5,11 @@ import { useRef, useEffect, useState } from 'react'
 import { useAI, AI_MODELS } from './AIContext'
 import DiffView from './DiffView'
 import SnapshotTimeline from './SnapshotTimeline'
-import { Doc, Id } from '@/convex/_generated/dataModel'
-
-type Snapshot = Doc<"snapshots">
+import { Id } from '@/convex/_generated/dataModel'
 
 interface AISidebarProps {
   editor: Editor
-  snapshots: Snapshot[]
+  snapshots: any[]
   onSaveSnapshot: () => void
   onRestore: (id: Id<"snapshots">) => void
 }
@@ -151,7 +149,7 @@ export default function AISidebar({ editor, snapshots, onSaveSnapshot, onRestore
 
         {/* Snapshot Timeline */}
         <SnapshotTimeline
-          snapshots={snapshots}
+          snapshots={snapshots as any}
           onSaveSnapshot={onSaveSnapshot}
           onRestore={onRestore}
         />

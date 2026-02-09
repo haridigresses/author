@@ -2,7 +2,7 @@
 
 import { Editor } from "@tiptap/react"
 import { useEffect, useRef, useCallback } from "react"
-import { useMutation, useQuery } from "convex/react"
+import { useMutation, useQuery, useConvex } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import { Id } from "@/convex/_generated/dataModel"
 import { jsonToMarkdown } from "@/lib/markdown"
@@ -30,15 +30,9 @@ export function useSnapshots(editor: Editor | null, documentId: Id<"documents"> 
     documentId ? { documentId } : "skip"
   )
   const createSnapshot = useMutation(api.snapshots.create)
+  const convex = useConvex()
   const lastMarkdownRef = useRef<string>("")
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-
-  // Keep last markdown in sync with most recent snapshot
-  useEffect(() => {
-    if (snapshots && snapshots.length > 0) {
-      lastMarkdownRef.current = snapshots[0].markdown
-    }
-  }, [snapshots])
 
   const takeSnapshot = useCallback(
     async (
@@ -104,10 +98,11 @@ export function useSnapshots(editor: Editor | null, documentId: Id<"documents"> 
     [takeSnapshot]
   )
 
+  // Fetch full snapshot on demand (not from the stripped list)
   const restore = useCallback(
-    (snapshotId: Id<"snapshots">) => {
-      if (!editor || !snapshots) return
-      const snap = snapshots.find((s) => s._id === snapshotId)
+    async (snapshotId: Id<"snapshots">) => {
+      if (!editor) return
+      const snap = await convex.query(api.snapshots.getSnapshot, { id: snapshotId })
       if (!snap?.contentJson) return
       try {
         const json = JSON.parse(snap.contentJson)
@@ -116,7 +111,7 @@ export function useSnapshots(editor: Editor | null, documentId: Id<"documents"> 
         // Invalid JSON — ignore
       }
     },
-    [editor, snapshots]
+    [editor, convex]
   )
 
   return {

@@ -3,16 +3,15 @@
 import { Editor } from '@tiptap/react'
 import AISidebar from './AISidebar'
 import MenckenPanel from './MenckenPanel'
-import { Doc, Id } from '@/convex/_generated/dataModel'
+import { Id } from '@/convex/_generated/dataModel'
 
-type Snapshot = Doc<"snapshots">
 type SidebarMode = 'ai' | 'mencken'
 
 interface SidebarProps {
   editor: Editor
   mode: SidebarMode
-  // Snapshot props
-  snapshots: Snapshot[]
+  // Snapshot props (typed loosely — exact shape depends on deployed Convex functions)
+  snapshots: any[]
   onSaveSnapshot: () => void
   onRestore: (id: Id<"snapshots">) => void
   // Mencken props

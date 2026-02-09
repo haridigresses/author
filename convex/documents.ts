@@ -9,11 +9,13 @@ export const list = query({
     if (!userId) {
       return []
     }
-    return await ctx.db
+    const docs = await ctx.db
       .query("documents")
       .filter((q) => q.eq(q.field("userId"), userId))
       .order("desc")
       .collect()
+    // Strip content to avoid transferring megabytes of base64 image data on every reactive update
+    return docs.map(({ content, ...meta }) => meta)
   },
 })
 

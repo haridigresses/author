@@ -1,13 +1,21 @@
 'use client'
 
 import { useState } from 'react'
-import DiffView from './DiffView'
-import { Doc, Id } from '@/convex/_generated/dataModel'
+import { Id } from '@/convex/_generated/dataModel'
 
-type Snapshot = Doc<"snapshots">
+interface SnapshotMeta {
+  _id: Id<"snapshots">
+  _creationTime: number
+  documentId: Id<"documents">
+  wordCount: number
+  label: string
+  trigger: "auto" | "manual" | "ai-before" | "ai-after"
+  createdAt: number
+  hasContentJson: boolean
+}
 
 interface SnapshotTimelineProps {
-  snapshots: Snapshot[]
+  snapshots: SnapshotMeta[]
   onSaveSnapshot: () => void
   onRestore: (id: Id<"snapshots">) => void
 }
@@ -39,38 +47,6 @@ export default function SnapshotTimeline({
   onRestore,
 }: SnapshotTimelineProps) {
   const [expanded, setExpanded] = useState(false)
-  const [selected, setSelected] = useState<Set<Id<"snapshots">>>(new Set())
-  const [comparing, setComparing] = useState(false)
-
-  const toggleSelect = (id: Id<"snapshots">) => {
-    setSelected((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) {
-        next.delete(id)
-      } else {
-        if (next.size >= 2) {
-          // Replace the oldest selection
-          const first = next.values().next().value!
-          next.delete(first)
-        }
-        next.add(id)
-      }
-      return next
-    })
-    setComparing(false)
-  }
-
-  const canCompare = selected.size === 2
-  const selectedIds = Array.from(selected)
-
-  const getCompareSnapshots = () => {
-    if (selectedIds.length !== 2) return null
-    const s1 = snapshots.find((s) => s._id === selectedIds[0])
-    const s2 = snapshots.find((s) => s._id === selectedIds[1])
-    if (!s1 || !s2) return null
-    // Order by time (older first)
-    return s1.createdAt <= s2.createdAt ? [s1, s2] : [s2, s1]
-  }
 
   const visibleSnapshots = expanded ? snapshots : snapshots.slice(0, 5)
 
@@ -98,48 +74,8 @@ export default function SnapshotTimeline({
             </div>
           ) : (
             <>
-              {canCompare && (
-                <div className="snapshot-compare-bar">
-                  <button
-                    className="snapshot-compare-btn"
-                    onClick={() => setComparing(!comparing)}
-                  >
-                    {comparing ? 'Hide diff' : 'Compare selected'}
-                  </button>
-                  <button
-                    className="snapshot-clear-btn"
-                    onClick={() => {
-                      setSelected(new Set())
-                      setComparing(false)
-                    }}
-                  >
-                    Clear
-                  </button>
-                </div>
-              )}
-
-              {comparing && (() => {
-                const pair = getCompareSnapshots()
-                if (!pair) return null
-                return (
-                  <div className="snapshot-diff-overlay">
-                    <DiffView original={pair[0].markdown} suggested={pair[1].markdown} />
-                  </div>
-                )
-              })()}
-
               {visibleSnapshots.map((snap) => (
-                <div
-                  key={snap._id}
-                  className={`snapshot-item ${selected.has(snap._id) ? 'snapshot-item-selected' : ''}`}
-                >
-                  <button
-                    className="snapshot-item-select"
-                    onClick={() => toggleSelect(snap._id)}
-                    title="Select for comparison"
-                  >
-                    <span className={`snapshot-checkbox ${selected.has(snap._id) ? 'snapshot-checkbox-checked' : ''}`} />
-                  </button>
+                <div key={snap._id} className="snapshot-item">
                   <div className="snapshot-item-info">
                     <span className="snapshot-item-time">{timeAgo(snap.createdAt)}</span>
                     <span className={`snapshot-item-trigger snapshot-trigger-${snap.trigger}`}>
@@ -150,7 +86,7 @@ export default function SnapshotTimeline({
                   <div className="snapshot-item-label" title={snap.label}>
                     {snap.label}
                   </div>
-                  {snap.contentJson && (
+                  {snap.hasContentJson && (
                     <button
                       className="snapshot-restore-btn"
                       onClick={() => onRestore(snap._id)}
