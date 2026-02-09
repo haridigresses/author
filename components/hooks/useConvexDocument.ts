@@ -12,6 +12,7 @@ export function useConvexDocument(editor: Editor | null, documentId: Id<"documen
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const lastSavedRef = useRef<string>("")
+  const initialLoadDone = useRef(false)
 
   const document = useQuery(
     api.documents.get,
@@ -19,13 +20,16 @@ export function useConvexDocument(editor: Editor | null, documentId: Id<"documen
   )
   const updateDocument = useMutation(api.documents.update)
 
-  // Load document content when document changes
+  // Reset initial load flag when document ID changes
   useEffect(() => {
-    if (!editor || !document) return
+    initialLoadDone.current = false
+  }, [documentId])
 
-    const currentContent = JSON.stringify(editor.getJSON())
-    // Only set content if it's different (avoid cursor jump)
-    if (document.content && document.content !== currentContent) {
+  // Load document content only on initial load (not on reactive updates)
+  useEffect(() => {
+    if (!editor || !document || initialLoadDone.current) return
+
+    if (document.content) {
       try {
         const json = JSON.parse(document.content)
         editor.commands.setContent(json)
@@ -34,6 +38,7 @@ export function useConvexDocument(editor: Editor | null, documentId: Id<"documen
         // Invalid JSON - ignore
       }
     }
+    initialLoadDone.current = true
   }, [editor, document])
 
   // Save function

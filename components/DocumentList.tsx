@@ -3,6 +3,16 @@
 import { useQuery, useMutation } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import { Id } from "@/convex/_generated/dataModel"
+import { useState, useRef, useEffect } from "react"
+
+const STATUS_OPTIONS = [
+  { value: "idea", label: "Idea", color: "bg-sky-400" },
+  { value: "draft", label: "Draft", color: "bg-yellow-400" },
+  { value: "review", label: "Review", color: "bg-orange-500" },
+  { value: "completed", label: "Completed", color: "bg-emerald-500" },
+  { value: "published", label: "Published", color: "bg-violet-500" },
+  { value: "archived", label: "Archived", color: "bg-stone-400" },
+] as const
 
 interface DocumentListProps {
   currentDocumentId: Id<"documents"> | null
@@ -12,24 +22,31 @@ interface DocumentListProps {
 export default function DocumentList({ currentDocumentId, onSelect }: DocumentListProps) {
   const documents = useQuery(api.documents.list, {}) ?? []
   const createDocument = useMutation(api.documents.create)
-  const removeDocument = useMutation(api.documents.remove)
+  const updateDocument = useMutation(api.documents.update)
+
+  const [statusPickerId, setStatusPickerId] = useState<Id<"documents"> | null>(null)
+  const statusPickerRef = useRef<HTMLDivElement>(null)
+
+  // Close status picker on outside click
+  useEffect(() => {
+    if (!statusPickerId) return
+    const handleClick = (e: MouseEvent) => {
+      if (statusPickerRef.current && !statusPickerRef.current.contains(e.target as Node)) {
+        setStatusPickerId(null)
+      }
+    }
+    document.addEventListener("mousedown", handleClick)
+    return () => document.removeEventListener("mousedown", handleClick)
+  }, [statusPickerId])
 
   const handleCreate = async () => {
     const id = await createDocument({ title: "Untitled" })
     onSelect(id)
   }
 
-  const handleDelete = async (e: React.MouseEvent, id: Id<"documents">) => {
-    e.stopPropagation()
-    if (!confirm("Delete this document?")) return
-    await removeDocument({ id })
-    if (currentDocumentId === id) {
-      // Select another document or create new
-      const remaining = documents.filter(d => d._id !== id)
-      if (remaining.length > 0) {
-        onSelect(remaining[0]._id)
-      }
-    }
+  const handleStatusChange = async (id: Id<"documents">, status: string) => {
+    await updateDocument({ id, status })
+    setStatusPickerId(null)
   }
 
   const formatDate = (timestamp: number) => {
@@ -46,6 +63,9 @@ export default function DocumentList({ currentDocumentId, onSelect }: DocumentLi
     if (diffDays < 7) return `${diffDays}d ago`
     return date.toLocaleDateString()
   }
+
+  const getStatusOption = (status?: string) =>
+    STATUS_OPTIONS.find(s => s.value === status)
 
   return (
     <div className="document-list">
@@ -66,27 +86,55 @@ export default function DocumentList({ currentDocumentId, onSelect }: DocumentLi
             </button>
           </div>
         ) : (
-          documents.map((doc) => (
-            <div
-              key={doc._id}
-              className={`document-item ${currentDocumentId === doc._id ? "active" : ""}`}
-              onClick={() => onSelect(doc._id)}
-            >
-              <div className="document-item-content">
-                <span className="document-title">{doc.title || "Untitled"}</span>
-                <span className="document-date">{formatDate(doc.updatedAt)}</span>
-              </div>
-              <button
-                className="document-delete-btn"
-                onClick={(e) => handleDelete(e, doc._id)}
-                title="Delete"
+          documents.map((doc) => {
+            const statusOpt = getStatusOption(doc.status)
+            return (
+              <div
+                key={doc._id}
+                className={`document-item ${currentDocumentId === doc._id ? "active" : ""}`}
+                onClick={() => onSelect(doc._id)}
               >
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <path d="M3 3.5h8M5.5 3.5V2.5a1 1 0 011-1h1a1 1 0 011 1v1M6 6v4M8 6v4M4 3.5l.5 8a1 1 0 001 1h3a1 1 0 001-1l.5-8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-            </div>
-          ))
+                <div className="document-item-content">
+                  <div className="document-title-row">
+                    <span className="document-title">{doc.title || "Untitled"}</span>
+                    <div className="document-status-wrapper" ref={statusPickerId === doc._id ? statusPickerRef : undefined}>
+                      <span className={`document-status-dot-inline ${statusOpt?.color ?? "bg-gray-300"}`} />
+                      <button
+                        className="document-status-caret"
+                        title={statusOpt?.label ?? "Set status"}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setStatusPickerId(statusPickerId === doc._id ? null : doc._id)
+                        }}
+                      >
+                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                          <path d="M2.5 3.75L5 6.25L7.5 3.75" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+                      {statusPickerId === doc._id && (
+                        <div className="document-status-picker">
+                          {STATUS_OPTIONS.map((opt) => (
+                            <button
+                              key={opt.value}
+                              className={`document-status-option ${doc.status === opt.value ? "document-status-option-active" : ""}`}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleStatusChange(doc._id, opt.value)
+                              }}
+                            >
+                              <span className={`document-status-dot-sm ${opt.color}`} />
+                              {opt.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <span className="document-date">{formatDate(doc.updatedAt)}</span>
+                </div>
+              </div>
+            )
+          })
         )}
       </div>
     </div>

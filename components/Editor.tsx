@@ -29,7 +29,6 @@ import {
 import { SlashCommandExtension } from './extensions/SlashCommandExtension'
 import { FixedHeaderExtension } from './extensions/FixedHeaderExtension'
 import { BlockSelectionExtension } from './extensions/BlockSelectionExtension'
-import { TrackChanges, InsertionMark, DeletionMark } from '../extensions/TrackChanges'
 import Toolbar from './Toolbar'
 import StatusBar from './StatusBar'
 import { CommandPalette, DiffView } from './CommandPalette'
@@ -40,12 +39,13 @@ import Scratchpad from './Scratchpad'
 import AICommandPalette from './AICommandPalette'
 import { useConvexDocument } from './hooks/useConvexDocument'
 import { useDarkMode } from './hooks/useDarkMode'
-import { useVersionHistory } from './hooks/useVersionHistory'
+import { useSnapshots } from './hooks/useSnapshots'
 import { exportMarkdown } from './hooks/useExportMarkdown'
+import { useAI } from './AIContext'
 import { useEffect, useState } from 'react'
 import { Id } from '@/convex/_generated/dataModel'
 
-type SidebarMode = 'ai' | 'mencken' | 'track'
+type SidebarMode = 'ai' | 'mencken'
 
 interface EditorProps {
   documentId: Id<"documents">
@@ -54,7 +54,6 @@ interface EditorProps {
 
 export default function Editor({ documentId, onTitleChange }: EditorProps) {
   const [shortcutsState, setShortcutsState] = useState<HighlightShortcutsState | null>(null)
-  const [trackChangesEnabled, setTrackChangesEnabled] = useState(false)
   const [menckenEnabled, setMenckenEnabled] = useState(false)
   const [tabAIEnabled, setTabAIEnabled] = useState(false)
   const [scratchpadOpen, setScratchpadOpen] = useState(() => {
@@ -114,13 +113,8 @@ export default function Editor({ documentId, onTitleChange }: EditorProps) {
       SlashCommandExtension,
       FixedHeaderExtension,
       BlockSelectionExtension,
-      InsertionMark,
-      DeletionMark,
-      TrackChanges.configure({
-        onToggle: setTrackChangesEnabled,
-      }),
     ],
-    content: '<h1></h1><h3></h3><p></p>',
+    content: '<h1></h1><p></p>',
     editorProps: {
       attributes: {
         class: 'ProseMirror',
@@ -130,8 +124,9 @@ export default function Editor({ documentId, onTitleChange }: EditorProps) {
         // Create a temporary DOM to process the HTML
         const doc = new DOMParser().parseFromString(html, 'text/html')
 
-        // Helper to check if a paragraph is empty
+        // Helper to check if a paragraph is empty (but not if it contains images)
         const isEmpty = (el: HTMLElement): boolean => {
+          if (el.querySelector('img')) return false
           return !el.textContent?.trim()
         }
 
@@ -286,6 +281,12 @@ export default function Editor({ documentId, onTitleChange }: EditorProps) {
         const items = event.clipboardData?.items
         if (!items) return false
 
+        // If clipboard has HTML, let TipTap handle the full paste
+        // (images embedded in HTML will be preserved as <img> tags)
+        const hasHTML = Array.from(items).some(item => item.type === 'text/html')
+        if (hasHTML) return false
+
+        // Only handle standalone image pastes (no accompanying text/HTML)
         for (const item of Array.from(items)) {
           if (item.type.startsWith('image/')) {
             event.preventDefault()
@@ -337,7 +338,7 @@ export default function Editor({ documentId, onTitleChange }: EditorProps) {
   })
 
   const { document, isSaving, hasLock, lockedByOther } = useConvexDocument(editor, documentId)
-  const { versions, restore, snapshotNow } = useVersionHistory(editor)
+  const { snapshots, snapshotNow, snapshotBeforeAI, snapshotAfterAI, restore } = useSnapshots(editor, documentId)
 
   // Extract title from first H1 and sync
   useEffect(() => {
@@ -385,7 +386,6 @@ export default function Editor({ documentId, onTitleChange }: EditorProps) {
   // Determine sidebar mode based on active mode
   const getSidebarMode = (): SidebarMode => {
     if (menckenEnabled) return 'mencken'
-    if (trackChangesEnabled) return 'track'
     return 'ai'
   }
 
@@ -393,6 +393,7 @@ export default function Editor({ documentId, onTitleChange }: EditorProps) {
 
   return (
     <AIProvider>
+      <SnapshotBridge snapshotBeforeAI={snapshotBeforeAI} snapshotAfterAI={snapshotAfterAI} />
       <div className="editor-layout editor-layout-with-panel">
         <Scratchpad
           editor={editor}
@@ -405,19 +406,19 @@ export default function Editor({ documentId, onTitleChange }: EditorProps) {
             onExportMarkdown={() => exportMarkdown(editor)}
             onToggleDark={toggleDark}
             dark={dark}
-            trackChangesEnabled={trackChangesEnabled}
-            onToggleTrackChanges={() => editor.commands.toggleTrackChanges()}
             menckenEnabled={menckenEnabled}
             onToggleMencken={(enabled: boolean) => {
               editor.commands.toggleMencken(enabled)
               setMenckenEnabled(enabled)
             }}
+            tabAIEnabled={tabAIEnabled}
+            onToggleTabAI={handleToggleTabAI}
             scratchpadOpen={scratchpadOpen}
             onToggleScratchpad={() => setScratchpadOpen(prev => !prev)}
           />
           {lockedByOther && (
             <div className="editor-lock-warning">
-              ⚠️ This document is being edited by {lockedByOther}. Your changes will not be saved.
+              This document is being edited by {lockedByOther}. Your changes will not be saved.
             </div>
           )}
           <div className="editor-scroll">
@@ -435,11 +436,9 @@ export default function Editor({ documentId, onTitleChange }: EditorProps) {
         <Sidebar
           editor={editor}
           mode={getSidebarMode()}
-          tabAIEnabled={tabAIEnabled}
-          onToggleTabAI={handleToggleTabAI}
-          versions={versions}
+          snapshots={snapshots}
+          onSaveSnapshot={snapshotNow}
           onRestore={restore}
-          onSnapshot={snapshotNow}
           onCloseMencken={() => {
             editor.commands.toggleMencken(false)
             setMenckenEnabled(false)
@@ -451,4 +450,26 @@ export default function Editor({ documentId, onTitleChange }: EditorProps) {
       </div>
     </AIProvider>
   )
+}
+
+/** Bridge component to wire snapshot callbacks into the AI context */
+function SnapshotBridge({
+  snapshotBeforeAI,
+  snapshotAfterAI,
+}: {
+  snapshotBeforeAI: () => void
+  snapshotAfterAI: (prompt: string) => void
+}) {
+  const { setOnBeforeAI, setOnAfterAI } = useAI()
+
+  useEffect(() => {
+    setOnBeforeAI(() => snapshotBeforeAI)
+    setOnAfterAI(() => snapshotAfterAI)
+    return () => {
+      setOnBeforeAI(null)
+      setOnAfterAI(null)
+    }
+  }, [snapshotBeforeAI, snapshotAfterAI, setOnBeforeAI, setOnAfterAI])
+
+  return null
 }

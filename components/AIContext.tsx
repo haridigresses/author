@@ -36,7 +36,7 @@ interface AIContextType {
   selectionContext: { text: string; docContent: string } | null
   setSelectionContext: (ctx: { text: string; docContent: string } | null) => void
 
-  // Track changes mode
+  // Track changes mode (inline diff of AI suggestions)
   trackChanges: boolean
   setTrackChanges: (enabled: boolean) => void
 
@@ -51,6 +51,12 @@ interface AIContextType {
   // Model selection
   selectedModel: string
   setSelectedModel: (model: string) => void
+
+  // Snapshot callbacks (set by Editor, called by AISidebar)
+  onBeforeAI: (() => void) | null
+  setOnBeforeAI: (cb: (() => void) | null) => void
+  onAfterAI: ((prompt: string) => void) | null
+  setOnAfterAI: (cb: ((prompt: string) => void) | null) => void
 }
 
 const AIContext = createContext<AIContextType | null>(null)
@@ -64,6 +70,8 @@ export function AIProvider({ children }: { children: ReactNode }) {
   const [sidebarExpanded, setSidebarExpanded] = useState(false)
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
   const [selectedModel, setSelectedModelState] = useState(DEFAULT_MODEL)
+  const [onBeforeAI, setOnBeforeAI] = useState<(() => void) | null>(null)
+  const [onAfterAI, setOnAfterAI] = useState<((prompt: string) => void) | null>(null)
 
   // Load model from localStorage on mount
   useEffect(() => {
@@ -129,6 +137,10 @@ export function AIProvider({ children }: { children: ReactNode }) {
       setCommandPaletteOpen,
       selectedModel,
       setSelectedModel,
+      onBeforeAI,
+      setOnBeforeAI,
+      onAfterAI,
+      setOnAfterAI,
     }}>
       {children}
     </AIContext.Provider>

@@ -3,21 +3,18 @@
 import { Editor } from '@tiptap/react'
 import AISidebar from './AISidebar'
 import MenckenPanel from './MenckenPanel'
-import TrackChangesPanel from './TrackChangesPanel'
-import { Version } from './hooks/useVersionHistory'
+import { Doc, Id } from '@/convex/_generated/dataModel'
 
-type SidebarMode = 'ai' | 'mencken' | 'track'
+type Snapshot = Doc<"snapshots">
+type SidebarMode = 'ai' | 'mencken'
 
 interface SidebarProps {
   editor: Editor
   mode: SidebarMode
-  // AI sidebar props
-  tabAIEnabled: boolean
-  onToggleTabAI: (enabled: boolean) => void
-  // Track changes props
-  versions: Version[]
-  onRestore: (version: Version) => void
-  onSnapshot: () => void
+  // Snapshot props
+  snapshots: Snapshot[]
+  onSaveSnapshot: () => void
+  onRestore: (id: Id<"snapshots">) => void
   // Mencken props
   onCloseMencken: () => void
 }
@@ -25,11 +22,9 @@ interface SidebarProps {
 export default function Sidebar({
   editor,
   mode,
-  tabAIEnabled,
-  onToggleTabAI,
-  versions,
+  snapshots,
+  onSaveSnapshot,
   onRestore,
-  onSnapshot,
   onCloseMencken,
 }: SidebarProps) {
   return (
@@ -37,8 +32,9 @@ export default function Sidebar({
       {mode === 'ai' && (
         <AISidebar
           editor={editor}
-          tabAIEnabled={tabAIEnabled}
-          onToggleTabAI={onToggleTabAI}
+          snapshots={snapshots}
+          onSaveSnapshot={onSaveSnapshot}
+          onRestore={onRestore}
         />
       )}
 
@@ -46,18 +42,6 @@ export default function Sidebar({
         <MenckenPanel
           editor={editor}
           onClose={onCloseMencken}
-        />
-      )}
-
-      {mode === 'track' && (
-        <TrackChangesPanel
-          editor={editor}
-          versions={versions}
-          onRestore={(id) => {
-            const version = versions.find(v => v.id === id)
-            if (version) onRestore(version)
-          }}
-          onSnapshot={onSnapshot}
         />
       )}
     </div>

@@ -10,10 +10,10 @@ interface ToolbarProps {
   onExportMarkdown: () => void
   onToggleDark: () => void
   dark: boolean
-  trackChangesEnabled: boolean
-  onToggleTrackChanges: () => void
   menckenEnabled: boolean
   onToggleMencken: (enabled: boolean) => void
+  tabAIEnabled: boolean
+  onToggleTabAI: (enabled: boolean) => void
   scratchpadOpen?: boolean
   onToggleScratchpad?: () => void
 }
@@ -84,22 +84,13 @@ function Toggle({
   )
 }
 
-type EditorMode = 'track' | 'mencken' | null
+type EditorMode = 'mencken' | null
 
-export default function Toolbar({ editor, onExportMarkdown, onToggleDark, dark, trackChangesEnabled, onToggleTrackChanges, menckenEnabled, onToggleMencken, scratchpadOpen, onToggleScratchpad }: ToolbarProps) {
+export default function Toolbar({ editor, onExportMarkdown, onToggleDark, dark, menckenEnabled, onToggleMencken, tabAIEnabled, onToggleTabAI, scratchpadOpen, onToggleScratchpad }: ToolbarProps) {
   const [activeMode, setActiveMode] = useState<EditorMode>(null)
   const [showShortcuts, setShowShortcuts] = useState(false)
   const [showLinkModal, setShowLinkModal] = useState(false)
   const [showOverflow, setShowOverflow] = useState(false)
-
-  // Sync activeMode with trackChangesEnabled from parent
-  useEffect(() => {
-    if (trackChangesEnabled && activeMode !== 'track') {
-      setActiveMode('track')
-    } else if (!trackChangesEnabled && activeMode === 'track') {
-      setActiveMode(null)
-    }
-  }, [trackChangesEnabled, activeMode])
 
   // Sync activeMode with menckenEnabled from parent
   useEffect(() => {
@@ -110,22 +101,16 @@ export default function Toolbar({ editor, onExportMarkdown, onToggleDark, dark, 
     }
   }, [menckenEnabled, activeMode])
 
-  // Handle mode changes - only one mode can be active at a time
+  // Handle mode changes
   const setMode = (mode: EditorMode) => {
     const newMode = activeMode === mode ? null : mode
 
     // Disable previous mode
-    if (activeMode === 'track' && newMode !== 'track') {
-      if (trackChangesEnabled) onToggleTrackChanges()
-    }
     if (activeMode === 'mencken' && newMode !== 'mencken') {
       onToggleMencken(false)
     }
 
     // Enable new mode
-    if (newMode === 'track' && !trackChangesEnabled) {
-      onToggleTrackChanges()
-    }
     if (newMode === 'mencken') {
       onToggleMencken(true)
     }
@@ -220,22 +205,25 @@ export default function Toolbar({ editor, onExportMarkdown, onToggleDark, dark, 
         <button
           onClick={toggleToolbarRow}
           title={showOverflow ? "Hide formatting options" : "Show more formatting options"}
-          className="toolbar-expand-btn"
+          className={`toolbar-expand-btn ${showOverflow ? 'toolbar-expand-btn-open' : ''}`}
         >
-          {showOverflow ? '⌃' : '⌄'}
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3.5 5.25L7 8.75L10.5 5.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
         </button>
 
         <div className="flex-1" />
 
-        {/* Mode buttons - mutually exclusive */}
+        {/* Mode buttons */}
         <button
-          onClick={() => setMode('track')}
-          title="Track Changes - show edits as revisions"
-          className={`toolbar-mode-btn ${activeMode === 'track' ? 'toolbar-mode-btn-active' : ''}`}
+          onClick={() => onToggleTabAI(!tabAIEnabled)}
+          title={tabAIEnabled ? "Disable Tab AI autocomplete" : "Enable Tab AI autocomplete"}
+          className={`toolbar-mode-btn ${tabAIEnabled ? 'toolbar-mode-btn-active' : ''}`}
         >
-          <span className="toolbar-mode-icon">✎</span>
-          <span className="toolbar-mode-label">Track</span>
+          <span className="toolbar-mode-icon">⇥</span>
+          <span className="toolbar-mode-label">Tab AI</span>
         </button>
+
         <button
           onClick={() => setMode('mencken')}
           title="Writing analysis - opens panel with issues and AI suggestions"
